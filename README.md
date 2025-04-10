@@ -10,8 +10,9 @@ This project is sensor controlled synth.
 
 - Clone the repository with the submodules, run the shell command:
 
-`$ git clone --recurse-submodules https://github.com/RUC-MSc-CS-2sem-PC-2025/Specialisation-Project.git
-`
+```
+$ git clone --recurse-submodules https://github.com/RUC-MSc-CS-2sem-PC-2025/Specialisation-Project.git
+```
 
 - Build the libDaisy:
 
