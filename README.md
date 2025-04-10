@@ -39,7 +39,7 @@ $ make clean; make; make program-dfu;
 ## Editing the codebase:
 After completing the previous steps now the environment should be ready
 
-** NOTE: ALL THE CODE IS INSIDE "SensorSynth" Folder **
+**NOTE: Code to edit is inside "SensorSynth" Folder**
 
 Create a new branch:
 
