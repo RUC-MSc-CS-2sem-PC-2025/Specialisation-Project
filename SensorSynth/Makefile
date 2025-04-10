@@ -5,8 +5,8 @@ TARGET = SensorSynth
 CPP_SOURCES = SensorSynth.cpp
 
 # Library Locations
-LIBDAISY_DIR = ../libraries/libDaisy
-DAISYSP_DIR = ../libraries/DaisySP
+LIBDAISY_DIR = ../libraries/libDaisy/
+DAISYSP_DIR = ../libraries/DaisySP/
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core

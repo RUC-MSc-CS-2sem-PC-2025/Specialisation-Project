@@ -13,7 +13,7 @@ int main(void) {
   hw.StartLog(true);
 
   // And Print Hello World!
-  hw.PrintLine("Hello World!");
+  hw.PrintLine("Hello World! This is the Daisy Seed!");
 
   while(1) {}
 }
