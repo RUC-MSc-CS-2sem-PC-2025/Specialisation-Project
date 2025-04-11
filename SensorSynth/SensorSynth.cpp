@@ -1,30 +1,58 @@
-#include "daisy_seed.h"
 #include "daisysp.h"
+#include "daisy_seed.h"
 
-using namespace daisy;
 using namespace daisysp;
+using namespace daisy;
 
-DaisySeed hw;
+static DaisySeed  hw;
+static Oscillator osc;
 
-int main(void) {
+static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
+                          AudioHandle::InterleavingOutputBuffer out,
+                          size_t                                size)
+{
+    float sig;
+    for(size_t i = 0; i < size; i += 2)
+    {
+        sig = osc.Process();
 
-  hw.Init();
+        // left out
+        out[i] = sig;
 
-  AdcChannelConfig adc_cfg;
-  adc_cfg.InitSingle(daisy::seed::A0);
-  hw.adc.Init(&adc_cfg, 1);
-  hw.adc.Start();
+        // right out
+        out[i + 1] = sig;
+    }
+}
 
-  hw.StartLog(true);
+int main(void)
+{
+  
+    // initialize seed hardware and oscillator daisysp module
+    float sample_rate;
+    hw.Configure();
+    hw.Init();
+    hw.SetAudioBlockSize(4);
+    sample_rate = hw.AudioSampleRate();
+    osc.Init(sample_rate);
 
-  hw.PrintLine("Hello World! This is the Daisy Seed!");
+    AdcChannelConfig adc_cfg;
+    adc_cfg.InitSingle(daisy::seed::A0);
+    hw.adc.Init(&adc_cfg, 1);
+    hw.adc.Start();
 
-  while(1) {
+    // Set parameters for oscillator
+    osc.SetWaveform(osc.WAVE_SIN);
+    osc.SetFreq(440);
+    osc.SetAmp(0.5);
 
-    float analog_value = hw.adc.GetFloat(0);
 
-    // Print the value to the log
-    //!!! MAKEFILE: DISABBLE LOGGING FOR BETTER PERFORMANCE
-    hw.PrintLine("Analog Value (A0): %f", analog_value);
-  }
+    // start callback
+    hw.StartAudio(AudioCallback);
+
+
+    while(1) {
+        // read ADC value and set oscillator frequency
+        float adc_value = hw.adc.GetFloat(0);
+        osc.SetFreq(440 + (adc_value * 440));
+    }
 }
