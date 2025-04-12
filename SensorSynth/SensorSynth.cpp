@@ -26,9 +26,8 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
 
 int main(void)
 {
-  
-    // initialize seed hardware and oscillator daisysp module
     float sample_rate;
+
     hw.Configure();
     hw.Init();
     hw.SetAudioBlockSize(4);
@@ -40,16 +39,12 @@ int main(void)
     hw.adc.Init(&adc_cfg, 1);
     hw.adc.Start();
 
-    // Set parameters for oscillator
     osc.SetWaveform(osc.WAVE_SIN);
     osc.SetFreq(440);
     osc.SetAmp(0.5);
 
-
-    // start callback
     hw.StartAudio(AudioCallback);
-
-
+    
     while(1) {
         // read ADC value and set oscillator frequency
         float adc_value = hw.adc.GetFloat(0);
