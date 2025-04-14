@@ -41,7 +41,7 @@ int main(void)
 
     osc.SetWaveform(osc.WAVE_SIN);
     osc.SetFreq(440);
-    osc.SetAmp(0.5);
+    osc.SetAmp(1);
 
     hw.StartAudio(AudioCallback);
     
