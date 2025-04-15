@@ -46,7 +46,6 @@ int main(void)
     hw.StartAudio(AudioCallback);
     
     while(1) {
-        // read ADC value and set oscillator frequency
         float adc_value = hw.adc.GetFloat(0);
         osc.SetFreq(440 + (adc_value * 440));
     }
