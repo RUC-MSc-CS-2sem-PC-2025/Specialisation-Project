@@ -6,6 +6,8 @@ using namespace daisy;
 
 static DaisySeed  hw;
 static Oscillator osc;
+static Fm2        fm2;
+static float      amp = 0.5f;
 
 static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
                           AudioHandle::InterleavingOutputBuffer out,
@@ -14,7 +16,7 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
     float sig;
     for(size_t i = 0; i < size; i += 2)
     {
-        sig = osc.Process();
+        sig = fm2.Process() * amp;
 
         // left out
         out[i] = sig;
@@ -27,26 +29,37 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
 int main(void)
 {
     float sample_rate;
-
-    hw.Configure();
+    //hardware configuration
     hw.Init();
     hw.SetAudioBlockSize(4);
     sample_rate = hw.AudioSampleRate();
-    osc.Init(sample_rate);
 
     AdcChannelConfig adc_cfg;
     adc_cfg.InitSingle(daisy::seed::A0);
-    hw.adc.Init(&adc_cfg, 1);
+    adc_cfg.InitSingle(daisy::seed::A2);
+    hw.adc.Init(&adc_cfg, 2);
     hw.adc.Start();
+    //hw.StartLog(true);
 
+    //oscilator configuration
+    osc.Init(sample_rate);
     osc.SetWaveform(osc.WAVE_SIN);
     osc.SetFreq(440);
     osc.SetAmp(1);
 
+    //fm2 configuration
+    fm2.Init(sample_rate);
+    fm2.SetFrequency(55);
+    fm2.SetRatio(1.0f);
+    fm2.SetIndex(1.0f);
+
+
     hw.StartAudio(AudioCallback);
     
+
     while(1) {
-        float adc_value = hw.adc.GetFloat(0);
-        osc.SetFreq(440 + (adc_value * 440));
+        float adc_value_1 = hw.adc.GetFloat(0);
+        float adc_value_2 = hw.adc.GetFloat(1);
+        fm2.SetRatio(1.0f + (adc_value_1 * 2.0f));
     }
 }
