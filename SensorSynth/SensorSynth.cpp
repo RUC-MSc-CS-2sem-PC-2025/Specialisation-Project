@@ -16,7 +16,7 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
     float sig;
     for(size_t i = 0; i < size; i += 2)
     {
-        sig = fm2.Process() * amp;
+        sig = fm2.Process();
 
         // left out
         out[i] = sig;
@@ -37,7 +37,7 @@ int main(void)
     AdcChannelConfig adc_cfg;
     adc_cfg.InitSingle(daisy::seed::A0);
     adc_cfg.InitSingle(daisy::seed::A2);
-    hw.adc.Init(&adc_cfg, 2);
+    hw.adc.Init(&adc_cfg, 1);
     hw.adc.Start();
     //hw.StartLog(true);
 
@@ -59,7 +59,7 @@ int main(void)
 
     while(1) {
         float adc_value_1 = hw.adc.GetFloat(0);
-        float adc_value_2 = hw.adc.GetFloat(1);
+        float adc_value_2 = hw.adc.GetFloat(2);
         fm2.SetRatio(1.0f + (adc_value_1 * 2.0f));
     }
 }
