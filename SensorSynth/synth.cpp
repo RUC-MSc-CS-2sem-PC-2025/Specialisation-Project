@@ -65,18 +65,15 @@ int main(void)
     delay.Init();
     delay.SetDelay(sample_rate * delay_time);
 
-
-
     hw.StartAudio(AudioCallback);
     
-
     while(1) {
         float adc_value_1 = hw.adc.GetFloat(0);
         float adc_value_2 = hw.adc.GetFloat(1);
         float adc_value_3 = hw.adc.GetFloat(2);
 
         fm2.SetRatio(1.0f + (adc_value_1 * 2.0f));
-        
+
         delay_time = adc_value_2 * 0.8f;
         amp2 = adc_value_3;
     }

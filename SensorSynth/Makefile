@@ -1,8 +1,8 @@
 # Project Name
-TARGET = SensorSynth
+TARGET = sensorsynth
 
 # Sources
-CPP_SOURCES = SensorSynth.cpp
+CPP_SOURCES = synth.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../libraries/libDaisy/
