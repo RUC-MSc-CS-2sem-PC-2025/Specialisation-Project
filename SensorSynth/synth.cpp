@@ -1,13 +1,16 @@
 #include "daisysp.h"
 #include "daisy_seed.h"
+#include "synthlib.h"
 
 using namespace daisysp;
 using namespace daisy;
+using namespace sensorsynth;
 
 static DaisySeed  hw;
 static Oscillator osc;
 static Fm2        fm2;
 static DelayLine<float, 48000> delay;
+static GainControl gain;
 
 static float      amp = 0.5f;
 static float      delay_time = 1.0f;
@@ -20,16 +23,16 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
     float sig1, sig2, mixed_sig, delayed_sig;
     for(size_t i = 0; i < size; i += 2)
     {
-        sig1 = fm2.Process() * amp2;
-        sig2 = osc.Process() * amp2;
+        sig1 = fm2.Process();
+        sig2 = osc.Process();
 
         mixed_sig = sig1 + sig2;
 
         delayed_sig = delay.Read();
         delay.Write(mixed_sig + (delayed_sig * 0.8f));
 
-        out[i] = delayed_sig;
-        out[i + 1] = delayed_sig;
+        out[i] = gain.AddGain(delayed_sig);
+        out[i + 1] = gain.AddGain(delayed_sig);
     }
 }
 
@@ -48,6 +51,10 @@ int main(void)
     hw.adc.Init(adc_cfg, 3);
     hw.adc.Start();
     //hw.StartLog(true);
+
+    //gaincontrole configuration
+    gain.Init();
+    gain.SetGain(0.5f);
 
     //oscilator configuration
     osc.Init(sample_rate);
@@ -75,6 +82,6 @@ int main(void)
         fm2.SetRatio(1.0f + (adc_value_1 * 2.0f));
 
         delay_time = adc_value_2 * 0.8f;
-        amp2 = adc_value_3;
+        gain.SetGain(adc_value_3);
     }
 }

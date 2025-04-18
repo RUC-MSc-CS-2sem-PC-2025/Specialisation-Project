@@ -7,6 +7,7 @@ CPP_SOURCES = synth.cpp
 # Library Locations
 LIBDAISY_DIR = ../libraries/libDaisy/
 DAISYSP_DIR = ../libraries/DaisySP/
+SYNTHLIB_DIR = ./SynthLib/
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
