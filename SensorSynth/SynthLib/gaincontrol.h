@@ -20,9 +20,9 @@ namespace sensorsynth
         void SetGain(float gain);
 
         float AddGain(float in);
-    
+
     private:
-        float     gain_;
+        float gain_;
     };
 
 }

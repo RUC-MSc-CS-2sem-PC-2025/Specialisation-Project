@@ -6,39 +6,36 @@ using namespace daisysp;
 using namespace daisy;
 using namespace sensorsynth;
 
-static DaisySeed  hw;
-static Oscillator osc, lfo1;
-static Fm2        fm2;
-static DelayLine<float, 48000> delay;
-static GainControl out_gain, gain1;
+static DaisySeed hw;
+static Oscillator osc1, osc2, osc3, osc4;
+static Oscillator lfo1, lfo2;
+static GainControl out_gain;
 
-static float      delay_time = 1.0f;
+static float key_freq = 440.0f;
 
-static void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
+static void AudioCallback(AudioHandle::InterleavingInputBuffer in,
                           AudioHandle::InterleavingOutputBuffer out,
-                          size_t                                size)
+                          size_t size)
 {
-    float sig1, sig2, out_sig, delayed_sig, lfo_gain;
-    for(size_t i = 0; i < size; i += 2)
+    float sig1, out_sig_L, out_sig_R, lfo_gain;
+
+    for (size_t i = 0; i < size; i += 2)
     {
-        sig1 = fm2.Process();
-        sig2 = osc.Process();
-        lfo_gain = lfo1.Process();
+        sig1 = osc1.Process();
+        lfo_gain = (lfo1.Process() + 1.0f) * 0.5f;
 
-        out_sig = (sig1 + sig2) * lfo_gain;
-
-        delayed_sig = delay.Read();
-        delay.Write(out_sig + (delayed_sig * 0.3f));
-
-        out[i] = out_gain.AddGain(out_sig);
-        out[i + 1] = out_gain.AddGain(out_sig);
+        out_sig_L = sig1 * lfo_gain;
+        out_sig_R = sig1 * lfo_gain;
+        out[i] = out_gain.AddGain(out_sig_L);
+        out[i + 1] = out_gain.AddGain(out_sig_R);
     }
 }
 
 int main(void)
 {
     float sample_rate;
-    //hardware configuration
+
+    // hardware configuration
     hw.Init();
     hw.SetAudioBlockSize(4);
     sample_rate = hw.AudioSampleRate();
@@ -49,46 +46,32 @@ int main(void)
     adc_cfg[2].InitSingle(daisy::seed::A2);
     hw.adc.Init(adc_cfg, 3);
     hw.adc.Start();
-    //hw.StartLog(true);
 
-    //gaincontrole configuration
+    // gaincontrole configuration
     out_gain.Init();
     out_gain.SetGain(0.5f);
 
-    gain1.Init();
-    out_gain.SetGain(1);
+    // oscilator configuration
+    osc1.Init(sample_rate);
+    osc1.SetWaveform(osc1.WAVE_SIN);
+    osc1.SetFreq(110);
+    osc1.SetAmp(1);
 
-    //oscilator configuration
-    osc.Init(sample_rate);
-    osc.SetWaveform(osc.WAVE_SAW);
-    osc.SetFreq(110);
-    osc.SetAmp(1);
-
-    //LFO configuration
+    // LFO configuration
     lfo1.Init(sample_rate);
-    lfo1.SetWaveform(osc.WAVE_SQUARE);
-    lfo1.SetFreq(2.0f);
+    lfo1.SetWaveform(lfo1.WAVE_SIN);
+    lfo1.SetFreq(0.5f);
     lfo1.SetAmp(1);
 
-    //fm2 configuration
-    fm2.Init(sample_rate);
-    fm2.SetFrequency(440);
-    fm2.SetRatio(1.0f);
-    fm2.SetIndex(1.0f);
-
-    // Delay configuration
-    delay.Init();
-    delay.SetDelay(sample_rate * delay_time);
-
     hw.StartAudio(AudioCallback);
-    
-    while(1) {
+
+    while (1)
+    {
         float photoA0 = hw.adc.GetFloat(0);
         float photoA1 = hw.adc.GetFloat(1);
         float potA2 = hw.adc.GetFloat(2);
 
-        fm2.SetRatio(1.0f + (photoA0 * 2.0f));
-        osc.SetFreq(440 * (photoA0 * 2.0f));
+        osc1.SetFreq(440 * (photoA0 * 2.0f));
 
         out_gain.SetGain(potA2);
     }

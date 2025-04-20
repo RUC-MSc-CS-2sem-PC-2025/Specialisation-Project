@@ -2,8 +2,8 @@
 
 using namespace sensorsynth;
 
-void GainControl::Init(){ gain_ = 1.0f; };
+void GainControl::Init() { gain_ = 1.0f; };
 
-void GainControl::SetGain(float gain){ gain_ = gain; };
+void GainControl::SetGain(float gain) { gain_ = gain; };
 
-float GainControl::AddGain(float in){ return in * gain_; };
+float GainControl::AddGain(float in) { return in * gain_; };

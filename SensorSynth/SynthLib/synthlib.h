@@ -3,5 +3,6 @@
 #define SNTH_LB_H
 
 #include "gaincontrol.h"
+#include "components.h"
 
 #endif
