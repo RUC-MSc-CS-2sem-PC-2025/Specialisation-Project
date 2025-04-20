@@ -2,7 +2,8 @@
 TARGET = sensorsynth
 
 # Sources
-CPP_SOURCES = synth.cpp gaincontrol.cpp
+CPP_SOURCES = synth.cpp $(shell find ./SynthLib -name "*.cpp")
+CXXFLAGS += -I./SynthLib -I$(shell find ./SynthLib -type d)
 
 # Library Locations
 LIBDAISY_DIR = ../libraries/libDaisy/

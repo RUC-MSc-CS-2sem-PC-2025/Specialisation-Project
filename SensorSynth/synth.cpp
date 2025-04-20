@@ -1,6 +1,6 @@
 #include "daisysp.h"
 #include "daisy_seed.h"
-#include "synthlib.h"
+#include "./SynthLib/synthlib.h"
 
 using namespace daisysp;
 using namespace daisy;
