@@ -22,19 +22,47 @@ namespace sensorsynth
     private:
         uint8_t pin_;
         float value_;
-        uint8_t type_;
     };
 
     class Photores
     {
-        public:
-        Photores(){};
-        ~Photores(){};
+    public:
+        Photores() {};
+        ~Photores() {};
+        uint8_t GetPin() {};
+        float GetValue() {};
+        uint8_t GetType() {};
 
-        private:
+    private:
         uint8_t pin_;
         float value_;
         uint8_t type_;
+    };
+
+    class InfraSensor
+    {
+    public:
+        InfraSensor() {};
+        ~InfraSensor() {};
+        uint8_t GetPin() {};
+        float GetValue() {};
+
+    private:
+        uint8_t pin_;
+        float value_;
+    };
+
+    class TempSensor
+    {
+    public:
+        TempSensor() {};
+        ~TempSensor() {};
+        uint8_t GetPin() {};
+        float GetValue() {};
+
+    private:
+        uint8_t pin_;
+        float value_;
     };
 
 }
