@@ -1,8 +1,8 @@
 # Project Name
-TARGET = SensorSynth
+TARGET = sensorsynth
 
 # Sources
-CPP_SOURCES = SensorSynth.cpp
+CPP_SOURCES = synth.cpp gaincontrol.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../libraries/libDaisy/
@@ -14,4 +14,4 @@ include $(SYSTEM_FILES_DIR)/Makefile
 
 # Float support
 # Uncomment the following line to enable float support in printf
-LDFLAGS += -u _printf_float
+# LDFLAGS += -u _printf_float
