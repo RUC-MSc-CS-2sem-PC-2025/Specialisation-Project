@@ -9,8 +9,8 @@ namespace sensorsynth
     class GainControl
     {
     public:
-        GainControl();
-        ~GainControl();
+        GainControl() {};
+        ~GainControl() {};
 
         void Init();
 
