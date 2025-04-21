@@ -2,12 +2,6 @@
 
 using namespace sensorsynth;
 
-HarmonyDrone::HarmonyDrone(float samplerate, float key_freq)
-{
-    sample_rate_ = samplerate;
-    key_freq_ = key_freq;
-};
-
 void HarmonyDrone::SetKeyFreq(float freq)
 {
     key_freq_ = freq;
@@ -36,11 +30,11 @@ void HarmonyDrone::InitOsc(daisysp::Oscillator &osc, float sample_rate, float fr
     osc.SetAmp(amp);
 };
 
-void HarmonyDrone::Init()
+void HarmonyDrone::Init(float sample_rate, float key_freq)
 {
-    float sample_rate = GetSampleRate();
+    sample_rate_ = sample_rate;
+    key_freq_ = key_freq;
 
-    float key_freq = GetKeyFreq();
     float half_key_freq = key_freq * 0.5f;
     float double_key_freq = key_freq * 2.0f;
     float quadruple_key_freq = key_freq * 4.0f;
@@ -49,12 +43,12 @@ void HarmonyDrone::Init()
     InitOsc(osc2, sample_rate, half_key_freq, 1, daisysp::Oscillator::WAVE_SIN);
     InitOsc(osc3, sample_rate, double_key_freq * 2, 1, daisysp::Oscillator::WAVE_SIN);
     InitOsc(osc4, sample_rate, quadruple_key_freq * 4, 1, daisysp::Oscillator::WAVE_SIN);
-
     InitOsc(lfo1, sample_rate, 0.5f, 1, daisysp::Oscillator::WAVE_SIN);
     InitOsc(lfo2, sample_rate, 0.25f, 1, daisysp::Oscillator::WAVE_SIN);
 };
 
-float HarmonyDrone::Process(float sample_rate)
+float HarmonyDrone::Process()
 {
-    return 0.0f;
+    float sig = osc1.Process() + osc2.Process() + osc3.Process() + osc4.Process();
+    return sig;
 };
