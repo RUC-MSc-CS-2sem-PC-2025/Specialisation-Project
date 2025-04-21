@@ -7,11 +7,40 @@ using namespace daisy;
 using namespace sensorsynth;
 
 static DaisySeed hw;
-static Oscillator osc1, osc2, osc3, osc4;
-static Oscillator lfo1, lfo2;
 static GainControl out_gain;
+static Photores photo1, photo2;
+
+daisy::Pin adc_pins[] =
+    {
+        daisy::seed::A0,
+        daisy::seed::A1,
+        daisy::seed::A2};
 
 static float key_freq = 440.0f;
+
+void ConfigureADC(unsigned char num_connections, daisy::Pin pins[])
+{
+    AdcChannelConfig adc_cfg[num_connections];
+
+    for (unsigned char i = 0; i < num_connections; i += 1)
+    {
+        adc_cfg[i].InitSingle(pins[i]);
+    }
+
+    hw.adc.Init(adc_cfg, num_connections);
+}
+
+float InitHardware(daisy::DaisySeed hw)
+{
+    float sample_rate;
+
+    hw.Init();
+    hw.SetAudioBlockSize(4);
+    sample_rate = hw.AudioSampleRate();
+    hw.adc.Start();
+
+    return sample_rate;
+}
 
 static void AudioCallback(AudioHandle::InterleavingInputBuffer in,
                           AudioHandle::InterleavingOutputBuffer out,
@@ -21,8 +50,7 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer in,
 
     for (size_t i = 0; i < size; i += 2)
     {
-        sig1 = osc1.Process();
-        lfo_gain = (lfo1.Process() + 1.0f) * 0.5f;
+
 
         out_sig_L = sig1 * lfo_gain;
         out_sig_R = sig1 * lfo_gain;
@@ -33,31 +61,17 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer in,
 
 int main(void)
 {
-    float sample_rate;
+    float sample_rate = InitHardware(hw);
+    ConfigureADC(3, adc_pins);
 
-    // hardware configuration
-    hw.Init();
-    hw.SetAudioBlockSize(4);
-    sample_rate = hw.AudioSampleRate();
-
-    AdcChannelConfig adc_cfg[3];
-    adc_cfg[0].InitSingle(daisy::seed::A0);
-    adc_cfg[1].InitSingle(daisy::seed::A1);
-    adc_cfg[2].InitSingle(daisy::seed::A2);
-    hw.adc.Init(adc_cfg, 3);
-    hw.adc.Start();
-
-    // gaincontrole configuration
     out_gain.Init();
     out_gain.SetGain(0.5f);
 
-    // oscilator configuration
     osc1.Init(sample_rate);
     osc1.SetWaveform(osc1.WAVE_SIN);
     osc1.SetFreq(110);
     osc1.SetAmp(1);
 
-    // LFO configuration
     lfo1.Init(sample_rate);
     lfo1.SetWaveform(lfo1.WAVE_SIN);
     lfo1.SetFreq(0.5f);
@@ -67,12 +81,11 @@ int main(void)
 
     while (1)
     {
-        float photoA0 = hw.adc.GetFloat(0);
-        float photoA1 = hw.adc.GetFloat(1);
-        float potA2 = hw.adc.GetFloat(2);
+        photo1.SetValue(hw.adc.GetFloat(0));
+        photo2.SetValue(hw.adc.GetFloat(1));
 
-        osc1.SetFreq(440 * (photoA0 * 2.0f));
+        osc1.SetFreq(440 * (photo1.GetValue() * 2.0f));
 
-        out_gain.SetGain(potA2);
+        out_gain.SetGain(photo2.GetValue());
     }
 }

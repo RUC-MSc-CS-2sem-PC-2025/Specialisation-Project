@@ -2,16 +2,5 @@
 
 using namespace sensorsynth;
 
-Pot::Pot() {};
-Pot::~Pot() {};
-uint8_t Pot::GetPin() {
-    return pin_;
-}
-
-float Pot::GetValue() {
-    return value_;
-}
-
-uint8_t Pot::GetType() {
-    return 0;
-}
+void Photores::SetValue(float value) { value_ = value; };
+float Photores::GetValue() { return value_; };
