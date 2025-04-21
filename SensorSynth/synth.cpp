@@ -8,9 +8,8 @@ using namespace sensorsynth;
 
 static DaisySeed hw;
 static GainControl out_gain;
-static Photores photo1, photo2;
+static Photores photo1, photo2, photo3;
 static HarmonyDrone harmonydrone;
-static Oscillator osc;
 
 daisy::Pin adc_pins[] =
     {
@@ -30,6 +29,7 @@ void ConfigureADC(unsigned char num_connections, daisy::Pin pins[])
     }
 
     hw.adc.Init(adc_cfg, num_connections);
+    hw.adc.Start();
 }
 
 float InitHardware(daisy::DaisySeed& hw)
@@ -39,8 +39,6 @@ float InitHardware(daisy::DaisySeed& hw)
     hw.Init();
     hw.SetAudioBlockSize(4);
     sample_rate = hw.AudioSampleRate();
-    hw.adc.Start();
-
     return sample_rate;
 }
 
@@ -57,28 +55,19 @@ static void AudioCallback(AudioHandle::InterleavingInputBuffer in,
         out_sig_L = sig1;
         out_sig_R = sig1;
 
-        out[i] = out_sig_L;
-        out[i + 1] = out_sig_R;
+        out[i] = out_gain.AddGain(out_sig_L);
+        out[i + 1] = out_gain.AddGain(out_sig_R);
     }
 }
 
 int main(void)
 {
     float sample_rate;
-
-    hw.Init();
-    hw.SetAudioBlockSize(4);
-    sample_rate = hw.AudioSampleRate();
+    sample_rate = InitHardware(hw);
 
     ConfigureADC(3, adc_pins);
-    hw.adc.Start();
 
     harmonydrone.Init(sample_rate, key_freq);
-
-    osc.Init(sample_rate);
-    osc.SetWaveform(osc.WAVE_SIN);
-    osc.SetFreq(key_freq);
-    osc.SetAmp(1);
 
     out_gain.Init();
     out_gain.SetGain(0.5f);
@@ -87,8 +76,9 @@ int main(void)
 
     while (1)
     {
-        //photo1.SetValue(hw.adc.GetFloat(0));
-        //photo2.SetValue(hw.adc.GetFloat(1));
-        //out_gain.SetGain(photo2.GetValue());
+        photo1.SetValue(hw.adc.GetFloat(0));
+        photo2.SetValue(hw.adc.GetFloat(1));
+        photo3.SetValue(hw.adc.GetFloat(2));
+        out_gain.SetGain(photo3.GetValue());
     }
 }
