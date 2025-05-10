@@ -15,21 +15,31 @@ namespace sensorsynth
         HarmonyDrone() {};
         ~HarmonyDrone() {};
 
-        void Init(float sample_rate, float key_freq);
+        void SetKeyFreq(float freq) { key_freq_ = freq; };
+        float GetKeyFreq() { return key_freq_; };
+        void SetSampleRate(float sample_rate) { sample_rate_ = sample_rate; };
+        float GetSampleRate() { return sample_rate_; };
 
-        void SetKeyFreq(float freq);
-        float GetKeyFreq();
-        void SetSampleRate(float sample_rate);
-        float GetSampleRate();
+        void SetOutL(float in) { out_L_ = in; };
+        void SetOutR(float in) { out_R_ = in; };
+        float GetOutL() { return out_L_; };
+        float GetOutR() { return out_R_; };
 
         void InitOsc(daisysp::Oscillator &osc, float sample_rate, float freq, float amp, uint8_t waveform);
-        float Process();
+        void Init(const float sample_rate, float key_freq);
+
+        void OscOneChangePitch(float new_feq);
+        void OscTwoChangePitch(float new_feq);
+        void Unison(float signal);
+        void Delay();
+        void Process(float &L, float &R);
 
     private:
-        daisysp::Oscillator osc1, osc2, osc3, osc4;
-        daisysp::Oscillator lfo1, lfo2;
+        daisysp::Oscillator osc1_, osc2_;
+
         float key_freq_;
         float sample_rate_;
+        float out_L_, out_R_;
     };
 
 }

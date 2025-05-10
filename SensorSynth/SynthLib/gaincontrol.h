@@ -3,7 +3,7 @@
 #define GN_CNTRL_H
 
 #ifdef __cplusplus
-    
+
 namespace sensorsynth
 {
     class GainControl
@@ -13,7 +13,6 @@ namespace sensorsynth
         ~GainControl() {};
 
         void Init();
-
 
         void SetGain(float gain);
 

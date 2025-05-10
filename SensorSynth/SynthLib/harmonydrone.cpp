@@ -2,27 +2,10 @@
 
 using namespace sensorsynth;
 
-void HarmonyDrone::SetKeyFreq(float freq)
-{
-    key_freq_ = freq;
-};
+daisysp::DelayLine<float, 48000> delay_line_L; // Left channel delay
+daisysp::DelayLine<float, 48000> delay_line_R;
 
-float HarmonyDrone::GetKeyFreq()
-{
-    return key_freq_;
-};
-
-void HarmonyDrone::SetSampleRate(float sample_rate)
-{
-    sample_rate_ = sample_rate;
-};
-
-float HarmonyDrone::GetSampleRate()
-{
-    return sample_rate_;
-};
-
-void HarmonyDrone::InitOsc(daisysp::Oscillator &osc, float sample_rate, float freq = 440, float amp = 1, uint8_t waveform = 0)
+void HarmonyDrone::InitOsc(daisysp::Oscillator &osc, float sample_rate, float freq, float amp, uint8_t waveform)
 {
     osc.Init(sample_rate);
     osc.SetWaveform(waveform);
@@ -30,25 +13,78 @@ void HarmonyDrone::InitOsc(daisysp::Oscillator &osc, float sample_rate, float fr
     osc.SetAmp(amp);
 };
 
-void HarmonyDrone::Init(float sample_rate, float key_freq)
+void HarmonyDrone::Init(const float sample_rate, float key_freq)
 {
     sample_rate_ = sample_rate;
     key_freq_ = key_freq;
 
-    float half_key_freq = key_freq * 0.5f;
-    float double_key_freq = key_freq * 2.0f;
-    float quadruple_key_freq = key_freq * 4.0f;
+    delay_line_L.Init();
+    delay_line_R.Init();
 
-    InitOsc(osc1, sample_rate, key_freq * 0.5f, 1, daisysp::Oscillator::WAVE_SIN);
-    InitOsc(osc2, sample_rate, half_key_freq, 1, daisysp::Oscillator::WAVE_SIN);
-    InitOsc(osc3, sample_rate, double_key_freq * 2, 1, daisysp::Oscillator::WAVE_SIN);
-    InitOsc(osc4, sample_rate, quadruple_key_freq * 4, 1, daisysp::Oscillator::WAVE_SIN);
-    InitOsc(lfo1, sample_rate, 0.5f, 1, daisysp::Oscillator::WAVE_SIN);
-    InitOsc(lfo2, sample_rate, 0.25f, 1, daisysp::Oscillator::WAVE_SIN);
+    delay_line_L.SetDelay(sample_rate * 0.7f);
+    delay_line_R.SetDelay(sample_rate * 0.8f);
+
+    InitOsc(osc1_, sample_rate, key_freq * 0.5f, 0.1, daisysp::Oscillator::WAVE_SQUARE);
+    InitOsc(osc2_, sample_rate, key_freq, 0.1, daisysp::Oscillator::WAVE_SQUARE);
 };
 
-float HarmonyDrone::Process()
+void HarmonyDrone::OscOneChangePitch(float new_freq)
 {
-    float sig = osc1.Process() + osc2.Process() + osc3.Process() + osc4.Process();
-    return sig;
+    osc1_.SetFreq(new_freq);
+};
+
+void HarmonyDrone::OscTwoChangePitch(float new_freq)
+{
+    osc2_.SetFreq(new_freq);
+};
+
+void HarmonyDrone::Unison(float signal)
+{
+    const int num_voices = 5;
+    const float detune_amounts[num_voices] = {-0.08f, -0.04f, 0.0f, 0.04f, 0.08f};
+    const float pan_positions[num_voices] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+    float left_output = 0.0f;
+    float right_output = 0.0f;
+
+    for (int i = 0; i < num_voices; ++i)
+    {
+        float detuned_signal = signal * (1.0f + detune_amounts[i]);
+
+        float pan = pan_positions[i];
+        left_output += detuned_signal * (1.0f - pan);
+        right_output += detuned_signal * pan;
+    }
+
+    SetOutL(left_output / num_voices);
+    SetOutR(right_output / num_voices);
+}
+
+void HarmonyDrone::Delay()
+{
+    float L = GetOutL();
+    float R = GetOutR();
+
+    // Read delayed samples
+    float delayed_L = delay_line_L.Read();
+    float delayed_R = delay_line_R.Read();
+
+    // Add feedback to the delay lines
+    delay_line_L.Write(L + delayed_L * 0.7f); // Feedback amount is 0.3
+    delay_line_R.Write(R + delayed_R * 0.7f);
+
+    // Mix the delayed signal with the original signal (feedback can be added here if needed)
+    SetOutL(L + delayed_L); // Mix original and delayed signals
+    SetOutR(R + delayed_R);
+}
+
+void HarmonyDrone::Process(float &L, float &R)
+{
+    float osc_output = osc1_.Process() * osc2_.Process();
+    // SetOutL(osc_output);
+    // SetOutR(osc_output);
+    Unison(osc_output);
+    Delay();
+
+    L = GetOutL();
+    R = GetOutR();
 };
