@@ -8,7 +8,7 @@ using namespace sensorsynth;
 
 static DaisySeed hw;
 static GainControl out_gain;
-static Sensor pot1, pot2, pot3, pot4, pot5, pot6;
+static Sensor pot1, pot2, pot3, pot4, pot5, pot6, pot7;
 static HarmonyDrone harmonydrone;
 
 daisy::Pin adc_pins[] =
@@ -18,7 +18,8 @@ daisy::Pin adc_pins[] =
         daisy::seed::A2,
         daisy::seed::A3,
         daisy::seed::A4,
-        daisy::seed::A5
+        daisy::seed::A5,
+        daisy::seed::A6
 
     };
 
@@ -66,7 +67,7 @@ int main(void)
     float sample_rate;
     sample_rate = InitHardware(hw);
 
-    ConfigureADC(6, adc_pins);
+    ConfigureADC(7, adc_pins);
 
     harmonydrone.Init(sample_rate, key_freq);
 
@@ -83,11 +84,17 @@ int main(void)
         pot4.SetValue(hw.adc.GetFloat(3));
         pot5.SetValue(hw.adc.GetFloat(4));
         pot6.SetValue(hw.adc.GetFloat(5));
+        pot7.SetValue(hw.adc.GetFloat(6));
 
 
         out_gain.SetGain(pot1.GetValue());
         harmonydrone.OscOneChangePitch(key_freq * pot2.GetValue());
         harmonydrone.OscTwoChangePitch(key_freq * pot3.GetValue());
+        harmonydrone.SetDelayTimeL(fclamp(pot4.GetValue(), 0.0f, 1.0f));
+        harmonydrone.SetDelayTimeR(fclamp(pot5.GetValue(), 0.0f, 1.0f));
+        harmonydrone.SetFilterFreq(pot6.GetValue());
+        harmonydrone.SetFilterRes(pot7.GetValue());
+
 
     }
 }

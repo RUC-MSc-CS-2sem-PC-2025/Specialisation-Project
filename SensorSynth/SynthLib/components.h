@@ -8,11 +8,11 @@
 
 namespace sensorsynth
 {
-    class Photores
+    class Sensor
     {
     public:
-        Photores(){};
-        ~Photores(){};
+        Sensor() {};
+        ~Sensor() {};
 
         void SetValue(float value);
         float GetValue();

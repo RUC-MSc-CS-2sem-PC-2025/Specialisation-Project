@@ -2,5 +2,5 @@
 
 using namespace sensorsynth;
 
-void Photores::SetValue(float value) { value_ = value; };
-float Photores::GetValue() { return value_; };
+void Sensor::SetValue(float value) { value_ = value; };
+float Sensor::GetValue() { return value_; };
