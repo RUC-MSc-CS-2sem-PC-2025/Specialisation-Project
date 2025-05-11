@@ -3,8 +3,9 @@ TARGET = sensorsynth
 
 # Sources
 CPP_SOURCES = synth.cpp $(shell find ./SynthLib -name "*.cpp")
-CXXFLAGS += -I./SynthLib -I$(shell find ./SynthLib -type d)
-C_INCLUDES += -I../libraries/DaisySP/Source
+CXXFLAGS += -I. -I./SynthLib -I$(shell find ./SynthLib -type d) -I../libraries/DaisySP
+
+C_INCLUDES += -I../libraries/DaisySP/Source -I../libraries/libDaisy/src
 
 # Library Locations
 LIBDAISY_DIR = ../libraries/libDaisy/

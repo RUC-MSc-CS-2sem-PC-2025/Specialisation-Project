@@ -1,5 +1,7 @@
 #include "daisysp.h"
 #include "unison.h"
+#include "gaincontrol.h"
+
 #include <algorithm>
 
 #pragma once
@@ -32,12 +34,13 @@ namespace sensorsynth
         void InitDelay(float &sample_rate, daisysp::DelayLine<float, 48000> &delay_line_L, daisysp::DelayLine<float, 48000> &delay_line_R);
         void InitUnison(u_int8_t voices);
         void InitFilter(float sample_rate, float freq, float res);
-
+        void InitGain();
         void Init(const float sample_rate, float key_freq);
 
 
         void Unison(float signal);
         void Delay();
+        void Volume();
         
         void Process(float &L, float &R);
 
@@ -48,13 +51,16 @@ namespace sensorsynth
         void SetDelayTimeR(float value);
         void SetFilterFreq(float freq);
         void SetFilterRes(float res);
+        void SetVolume(float value);
+
 
     private:
-        sensorsynth::Unison uni_;    
+        sensorsynth::Unison uni_;
+        sensorsynth::GainControl gain1_;
         daisysp::Oscillator osc1_, osc2_;
         daisysp::DelayLine<float, 48000> delay_line_L;
         daisysp::DelayLine<float, 48000> delay_line_R;
-        daisysp::LadderFilter ladder_filter_; // Add LadderFilter instance
+        daisysp::LadderFilter ladder_filter_;
 
 
         float key_freq_;

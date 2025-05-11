@@ -27,9 +27,14 @@ void HarmonyDrone::InitUnison(u_int8_t voices)
 void HarmonyDrone::InitFilter(float sample_rate, float freq, float res)
 {
     ladder_filter_.Init(sample_rate);
-    ladder_filter_.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12); // Band-pass mode
+    ladder_filter_.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12);
     ladder_filter_.SetFreq(freq);
     ladder_filter_.SetRes(res);
+}
+
+void HarmonyDrone::InitGain()
+{
+    gain1_.Init();
 }
 
 void HarmonyDrone::Init(const float sample_rate, float key_freq)
@@ -72,6 +77,18 @@ void HarmonyDrone::Delay()
     SetOutR(0.6f * R + 0.38f * delayed_R);
 }
 
+void HarmonyDrone::Volume()
+{
+    float L = GetOutL();
+    float R = GetOutR();
+
+    gain1_.AddGain(L);
+    gain1_.AddGain(R);
+
+    SetOutL(L);
+    SetOutR(R);
+}
+
 void HarmonyDrone::Process(float &L, float &R)
 {
     float osc_output = osc1_.Process() * osc2_.Process();
@@ -80,6 +97,7 @@ void HarmonyDrone::Process(float &L, float &R)
     SetOutR(filtered_output);
     // Unison(osc_output);
     Delay();
+    Volume();
 
     L = GetOutL();
     R = GetOutR();
@@ -118,4 +136,9 @@ void HarmonyDrone::SetFilterFreq(float value)
 void HarmonyDrone::SetFilterRes(float value)
 {
     ladder_filter_.SetRes(value);
+}
+
+void HarmonyDrone::SetVolume(float value)
+{
+    gain1_.SetGain(value);
 }

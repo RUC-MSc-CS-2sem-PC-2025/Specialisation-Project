@@ -12,11 +12,11 @@ namespace sensorsynth
         GainControl() {};
         ~GainControl() {};
 
-        void Init();
+        void Init()  { gain_ = 1.0f; };
 
-        void SetGain(float gain);
+        void SetGain(float gain) { gain_ = gain; };
 
-        float AddGain(float in);
+        void AddGain(float &in) { in =  in * gain_; };
 
     private:
         float gain_;
