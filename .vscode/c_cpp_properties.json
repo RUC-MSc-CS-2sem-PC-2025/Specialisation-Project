@@ -29,7 +29,8 @@
       ],
       "includePath": [
         "${workspaceFolder}/**",
-        "${workspaceFolder}/SensorSynth/SynthLib",
+        "${workspaceFolder}/SensorSynth/SynthLib/**",
+        "${workspaceFolder}/SensorSynth/Hardware/**",
         "${workspaceFolder}/../libraries/libDaisy/**",
         "${workspaceFolder}/../libraries/DaisySP/**"
       ],

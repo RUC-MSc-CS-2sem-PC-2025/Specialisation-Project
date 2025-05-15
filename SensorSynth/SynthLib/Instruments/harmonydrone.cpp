@@ -21,7 +21,6 @@ void HarmonyDrone::InitDelay(float &sample_rate, daisysp::DelayLine<float, 48000
 
 void HarmonyDrone::InitUnison(u_int8_t voices)
 {
-    uni_.Init(voices);
 }
 
 void HarmonyDrone::InitFilter(float sample_rate, float freq, float res)
@@ -42,39 +41,27 @@ void HarmonyDrone::Init(const float sample_rate, float key_freq)
     sample_rate_ = sample_rate;
     key_freq_ = key_freq;
 
-    InitDelay(sample_rate_, delay_line_L, delay_line_R);
+    //InitDelay(sample_rate_, delay_line_L, delay_line_R);
     InitOsc(osc1_, sample_rate, key_freq * 0.5f, 0.1, daisysp::Oscillator::WAVE_SQUARE);
     InitOsc(osc2_, sample_rate, key_freq, 0.1, daisysp::Oscillator::WAVE_SQUARE);
     InitUnison(3);
     InitFilter(sample_rate_, 1000.0f, 0.7f);
 };
 
-void HarmonyDrone::Unison(float signal)
-{
-    float L = GetOutL();
-    float R = GetOutR();
-
-    u_int8_t voices = uni_.GetNumVoices();
-
-    uni_.Process(L, R);
-
-    SetOutL(L / voices);
-    SetOutR(R / voices);
-}
 
 void HarmonyDrone::Delay()
 {
     float L = GetOutL();
     float R = GetOutR();
 
-    float delayed_L = delay_line_L.Read();
-    float delayed_R = delay_line_R.Read();
+    //float delayed_L = delay_line_L.Read();
+    //float delayed_R = delay_line_R.Read();
 
-    delay_line_L.Write(L + delayed_L * 0.6f);
-    delay_line_R.Write(R + delayed_R * 0.6f);
+    //delay_line_L.Write(L + delayed_L * 0.6f);
+    //delay_line_R.Write(R + delayed_R * 0.6f);
 
-    SetOutL(0.6f * L + 0.38f * delayed_L);
-    SetOutR(0.6f * R + 0.38f * delayed_R);
+    SetOutL(0.6f * L + 0.38f );
+    SetOutR(0.6f * R + 0.38f);
 }
 
 void HarmonyDrone::Volume()
@@ -92,11 +79,11 @@ void HarmonyDrone::Volume()
 void HarmonyDrone::Process(float &L, float &R)
 {
     float osc_output = osc1_.Process() * osc2_.Process();
-    float filtered_output = ladder_filter_.Process(osc_output);
-    SetOutL(filtered_output);
-    SetOutR(filtered_output);
+    //float filtered_output = ladder_filter_.Process(osc_output);
+    SetOutL(osc_output);
+    SetOutR(osc_output);
     // Unison(osc_output);
-    Delay();
+    //Delay();
     Volume();
 
     L = GetOutL();
@@ -115,17 +102,17 @@ void HarmonyDrone::OscTwoChangePitch(float new_freq)
 
 void HarmonyDrone::UnisoneDetune(float value)
 {
-    uni_.SetDetuneAmmounts(value);
+
 }
 
 void HarmonyDrone::SetDelayTimeL(float value)
 {
-    delay_line_L.SetDelay(sample_rate_ * value);
+    //delay_line_L.SetDelay(sample_rate_ * value);
 }
 
 void HarmonyDrone::SetDelayTimeR(float value)
 {
-    delay_line_R.SetDelay(sample_rate_ * value);
+    //delay_line_R.SetDelay(sample_rate_ * value);
 }
 
 void HarmonyDrone::SetFilterFreq(float value)

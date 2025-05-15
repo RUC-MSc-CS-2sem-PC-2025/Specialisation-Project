@@ -41,6 +41,16 @@
         "vector": "cpp",
         "algorithm": "cpp",
         "deque": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "complex": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "__tree": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "set": "cpp",
+        "span": "cpp",
+        "stack": "cpp",
+        "unordered_set": "cpp"
     }
 }

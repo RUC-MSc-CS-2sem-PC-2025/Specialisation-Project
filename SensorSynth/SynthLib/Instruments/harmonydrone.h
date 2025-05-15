@@ -1,6 +1,6 @@
 #include "daisysp.h"
-#include "unison.h"
-#include "gaincontrol.h"
+#include "../Utils/unison.h"
+#include "../Utils/gaincontrol.h"
 
 #include <algorithm>
 
@@ -55,11 +55,10 @@ namespace sensorsynth
 
 
     private:
-        sensorsynth::Unison uni_;
         sensorsynth::GainControl gain1_;
         daisysp::Oscillator osc1_, osc2_;
-        daisysp::DelayLine<float, 48000> delay_line_L;
-        daisysp::DelayLine<float, 48000> delay_line_R;
+        //daisysp::DelayLine<float, 48000> delay_line_L;
+        //daisysp::DelayLine<float, 48000> delay_line_R;
         daisysp::LadderFilter ladder_filter_;
 
 
