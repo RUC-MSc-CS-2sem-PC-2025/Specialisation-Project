@@ -11,6 +11,7 @@ using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
 static sensorsynth::Synth synth;
+AnalogControl pot;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
@@ -29,7 +30,7 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 
 int main(void)
 {
-    float sample_rate = hw.Init(256);
+    float sample_rate = hw.Init(512);
     synth.Init(sample_rate);
 
     hw.StartAudio(AudioCallback);

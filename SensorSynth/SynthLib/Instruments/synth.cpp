@@ -5,34 +5,46 @@ using namespace sensorsynth;
 
 void Synth::Init(float sample_rate)
 {
-    hosc1.Init(sample_rate, 440.0f, 5);
-    //shdrone_.Init(sample_rate);
-    out_gain.Init();
-    
-    // delay_L.initialize(sample_rate, 0.5);
-    // delay_L.setDelayTime(0.5f); 
-    // delay_L.setFeedback(0.7f);
+    hosc1.Init(sample_rate, 440.0f, 13);
 
-    // delay_R.initialize(sample_rate, 0.5);
-    // delay_R.setDelayTime(0.4f); 
-    // delay_R.setFeedback(0.7f);
+    // shdrone_.Init(sample_rate);
+    out_gain.Init();
+    chorus_.Init(sample_rate);
+    od_.Init();
+
+
+    lf_.Init(sample_rate);
+    lf_.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12);
+    lf_.SetRes(0.4f);
+
+    od_.SetDrive(0.2);
+
+    chorus_.SetLfoDepth(0.6f); // Set LFO depth (0.0 to 1.0)
+    chorus_.SetLfoFreq(2.0f);  // Set LFO frequency in Hz
+    chorus_.SetFeedback(0.3f);
+
+    delay_L.initialize(sample_rate, 1.2f);
+    delay_L.setDelayTime(0.6f);
+    delay_L.setFeedback(0.4f);
+
+    delay_R.initialize(sample_rate, 1.22f);
+    delay_R.setDelayTime(0.62f);
+    delay_R.setFeedback(0.4f);
 }
 
 void Synth::Process(float &out_left, float &out_right)
 {
-    //float out = hosc1.Process() * 0.95f + shdrone_.Process() * 0.05f;
-    hosc1.Process(out_left,out_right);
-    //float voice2 = hosc1.Process() * 0.98f; // Slight detune
-    //float voice3 = hosc1.Process() * 1.02f; // Slight detune
+    hosc1.Process(out_left, out_right);
 
-    // out_left = (voice1 + voice2 * 0.5f) * 0.7f;  // Pan slightly left
-    // out_right = (voice1 + voice3 * 0.5f) * 0.7f;
-    
-    //out_left = delay_L.process(out);
-    //out_right = delay_R.process(out);
-    // out_left = voice1 * 0.5f;
-    // out_right = voice1 * 0.5f;
+    float mix = od_.Process(out_left * 0.5 + out_right * 0.5) * 0.5f;
 
+    out_left += chorus_.Process(mix) * 0.75;
+    out_right += chorus_.GetRight() * 0.75;
+
+    out_left = lf_.Process(out_left);
+    out_right = lf_.Process(out_right);
+
+    // Add gain and clamp output
     out_gain.AddGain(out_left);
     out_gain.AddGain(out_right);
 

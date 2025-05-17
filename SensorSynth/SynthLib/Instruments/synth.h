@@ -1,4 +1,5 @@
 #include "../synthlib.h"
+#include "daisysp.h"
 
 #pragma once
 #ifndef SNTH_H
@@ -15,6 +16,10 @@ namespace sensorsynth
         sensorsynth::GainControl out_gain;
         sensorsynth::Delay delay_L, delay_R ;
         sensorsynth::SHDrone shdrone_;
+        daisysp::Chorus chorus_;
+        daisysp::Overdrive od_;
+        daisysp::LadderFilter lf_;
+
         Synth() {};
         ~Synth() {};
 

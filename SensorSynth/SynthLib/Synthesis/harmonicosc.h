@@ -31,7 +31,7 @@ namespace sensorsynth
 
         void Process(float &out_l, float &out_r);
 
-        float ProcessVoice();
+        float ProcessVoice(float freq);
 
         inline void SetFrequency(float freq) { freq_ = freq; };
 
@@ -71,6 +71,14 @@ namespace sensorsynth
             osc3_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
             osc4_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
         };
+
+        void DetuneVoices()
+        {
+            osc1_.SetFreq(current_freq_);
+            osc2_.SetFreq(current_freq_ * pow(2.0f, 3.0f / 12.0f));
+            osc3_.SetFreq(current_freq_ * pow(2.0f, 7.0f / 12.0f));
+            osc4_.SetFreq(current_freq_ * pow(2.0f, ctrl_2nd / 12.0f));
+        }
 
         daisysp::Oscillator osc1_, osc2_, osc3_, osc4_;
         std::vector<float> voices_;
