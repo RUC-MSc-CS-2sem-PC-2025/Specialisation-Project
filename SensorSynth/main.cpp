@@ -2,7 +2,7 @@
 #include "daisy_seed.h"
 #include "./SynthLib/synthlib.h"
 #include "./Hardware/hardware.h"
-#include "./Hardware/Logger.h"
+#include "./Hardware/logger.h"
 #include <cmath>
 
 using namespace daisysp;
@@ -11,27 +11,37 @@ using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
 static sensorsynth::Synth synth;
-AnalogControl pot;
+CpuLoadMeter cpu;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
                           size_t size)
 {
+    cpu.OnBlockStart();
     float out_left, out_right;
     for (size_t i = 0; i < size; i++)
     {
 
         synth.Process(out_left, out_right);
 
-        out[0][i] = out_left;  
-        out[1][i] = out_right; 
+        out[0][i] = out_left;
+        out[1][i] = out_right;
     }
+
+    cpu.OnBlockEnd();
+
 }
 
 int main(void)
 {
-    float sample_rate = hw.Init(512);
+    float sample_rate = hw.Init(256);
     synth.Init(sample_rate);
+
+    daisy::DaisySeed hw_ = hw.GetDaisySeed();
+    hw_.StartLog();
+
+
+    cpu.Init(sample_rate, 256);
 
     hw.StartAudio(AudioCallback);
     size_t num_sensors = hw.GetNumberOfSensors();
@@ -40,6 +50,8 @@ int main(void)
     while (1)
     {
         hw.ReadSensors();
+        float avgcpu = cpu.GetAvgCpuLoad();
+        hw_.PrintLine("Avg: %f", avgcpu);
 
         for (size_t i = 0; i < num_sensors; ++i)
         {

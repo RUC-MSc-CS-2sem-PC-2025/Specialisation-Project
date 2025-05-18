@@ -12,8 +12,10 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/SensorSynth/SynthLib",
-        "${workspaceFolder}/../libraries/libDaisy/**",
-        "${workspaceFolder}/../libraries/DaisySP/**"
+        "${workspaceFolder}/libraries/libDaisy/core",
+        "${workspaceFolder}/libraries/libDaisy/src",
+        "${workspaceFolder}/libraries/libDaisy/Drivers",
+        "${workspaceFolder}/libraries/DaisySP/**"
       ],
       "name": "Win32",
       "windowsSdkVersion": "10.0.17763.0"
