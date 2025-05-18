@@ -1,4 +1,5 @@
 #include "../synthlib.h"
+#include "daisy_seed.h"
 #include "daisysp.h"
 
 #pragma once
@@ -25,7 +26,7 @@ namespace sensorsynth
 
         void Init(float sample_rate);
 
-        void Process(float &out_left, float &out_right);
+        void Process(size_t size, daisy::AudioHandle::OutputBuffer &out);
 
         void MacroOne(float macro_value);   
         void MacroTwo(float macro_value); 

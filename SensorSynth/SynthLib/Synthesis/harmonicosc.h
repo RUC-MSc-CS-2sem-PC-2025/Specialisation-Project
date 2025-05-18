@@ -1,4 +1,5 @@
 #include "daisysp.h"
+#include "daisy_seed.h"
 
 #pragma once
 #ifndef HARMONICOSC_H
@@ -29,9 +30,11 @@ namespace sensorsynth
             n_voices_ = voices;
         };
 
-        void Process(float &out_l, float &out_r);
+        void ProcessBlock(size_t size, daisy::AudioHandle::OutputBuffer &out);
 
-        float ProcessVoice(float freq);
+        void ProcessVoiceBlock(size_t size, float freq, float* output);
+
+        void ProcessOscBlock(size_t size, daisysp::Oscillator &osc, float *out);
 
         inline void SetFrequency(float freq) { freq_ = freq; };
 
@@ -40,11 +43,6 @@ namespace sensorsynth
         inline void SetGlidetime(float glide_time) { glide_time_ = glide_time; };
 
         inline void SetSecondControl(float value) { ctrl_2nd = roundf(value * 12.0f); };
-
-        inline void SetDetuneAmount(float value)
-        {
-            d_amount = value * 100.0f; 
-        };
 
     private:
         void InitOsc(float sample_rate)
@@ -71,14 +69,6 @@ namespace sensorsynth
             osc3_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
             osc4_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
         };
-
-        void DetuneVoices()
-        {
-            osc1_.SetFreq(current_freq_);
-            osc2_.SetFreq(current_freq_ * pow(2.0f, 3.0f / 12.0f));
-            osc3_.SetFreq(current_freq_ * pow(2.0f, 7.0f / 12.0f));
-            osc4_.SetFreq(current_freq_ * pow(2.0f, ctrl_2nd / 12.0f));
-        }
 
         daisysp::Oscillator osc1_, osc2_, osc3_, osc4_;
         std::vector<float> voices_;

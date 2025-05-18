@@ -32,24 +32,26 @@ void Synth::Init(float sample_rate)
     delay_R.setFeedback(0.4f);
 }
 
-void Synth::Process(float &out_left, float &out_right)
+void Synth::Process(size_t size, daisy::AudioHandle::OutputBuffer &out)
 {
-    hosc1.Process(out_left, out_right);
 
-    float mix = od_.Process(out_left * 0.5 + out_right * 0.5) * 0.5f;
+    hosc1.ProcessBlock(size, out);
+    
 
-    //out_left += chorus_.Process(mix) * 0.75;
-    //out_right += chorus_.GetRight() * 0.75;
+    // float mix = od_.Process(out_left * 0.5 + out_right * 0.5) * 0.5f;
 
-    out_left = lf_.Process(mix);
-    out_right = lf_.Process(mix);
+    // //out_left += chorus_.Process(mix) * 0.75;
+    // //out_right += chorus_.GetRight() * 0.75;
 
-    // Add gain and clamp output
-    out_gain.AddGain(out_left);
-    out_gain.AddGain(out_right);
+    // out_left = lf_.Process(mix);
+    // out_right = lf_.Process(mix);
 
-    out_left = fminf(fmaxf(out_left, -1.0f), 1.0f);
-    out_right = fminf(fmaxf(out_right, -1.0f), 1.0f);
+    // // Add gain and clamp output
+    // out_gain.AddGain(out_left);
+    // out_gain.AddGain(out_right);
+
+    // out_left = fminf(fmaxf(out_left, -1.0f), 1.0f);
+    // out_right = fminf(fmaxf(out_right, -1.0f), 1.0f);
 };
 
 void Synth::MacroOne(float macro_value)
@@ -80,7 +82,7 @@ void Synth::MacroThree(float macro_value)
 
 void Synth::MacroFour(float macro_value)
 {
-    hosc1.SetDetuneAmount(macro_value);
+    // hosc1.SetDetuneAmount(macro_value);
 }
 
 void Synth::MacroFive(float macro_value)

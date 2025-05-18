@@ -46,7 +46,7 @@ namespace sensorsynth
         };
 
         /*
-            Flips the sensor value 
+            Flips the sensor value
             value = range 0.0f - 1.0f
         */
         static inline float ReverseSensorValue(float value)
@@ -62,10 +62,10 @@ namespace sensorsynth
         */
         static inline float OctaveRepeater(float value, u_int8_t num_octaves, u_int8_t midi_starting_point)
         {
-            if (num_octaves == 0) return midi_starting_point;
+            if (num_octaves == 0)
+                return midi_starting_point;
             return (static_cast<int>(value * 127.0f + 0.5f) % (12 * num_octaves)) + midi_starting_point;
         };
-
 
     private:
     };
