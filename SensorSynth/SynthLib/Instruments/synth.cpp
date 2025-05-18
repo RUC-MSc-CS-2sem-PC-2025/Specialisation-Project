@@ -38,11 +38,11 @@ void Synth::Process(float &out_left, float &out_right)
 
     float mix = od_.Process(out_left * 0.5 + out_right * 0.5) * 0.5f;
 
-    out_left += chorus_.Process(mix) * 0.75;
-    out_right += chorus_.GetRight() * 0.75;
+    //out_left += chorus_.Process(mix) * 0.75;
+    //out_right += chorus_.GetRight() * 0.75;
 
-    out_left = lf_.Process(out_left);
-    out_right = lf_.Process(out_right);
+    out_left = lf_.Process(mix);
+    out_right = lf_.Process(mix);
 
     // Add gain and clamp output
     out_gain.AddGain(out_left);
