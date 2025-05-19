@@ -15,30 +15,39 @@ void HarmonicOsc::ProcessBlock(size_t size, daisy::AudioHandle::OutputBuffer &ou
 {
     float voice1[size];
     float voice2[size];
+    float voice3[size];
 
-    if (glide_time_ > 0.0f)
-    {
-        float glide_step = (freq_ - current_freq_) / (glide_time_ * sr_);
-        for (size_t i = 0; i < size; i++)
-        {
-            if (fabsf(freq_ - current_freq_) > fabsf(glide_step))
-            {
-                current_freq_ += glide_step;
-            }
-            else
-            {
-                current_freq_ = freq_;
-            }
-        }
-    }
+    voice1[size] = {0};
+    voice2[size] = {0};
 
-    ProcessVoiceBlock(size, current_freq_, voice1);
-    ProcessVoiceBlock(size, current_freq_ + SEMITONE_0_2, voice2);
+    // if (glide_time_ > 0.0f)
+    // {
+    //     float glide_step = (freq_ - current_freq_) / (glide_time_ * sr_);
+    //     for (size_t i = 0; i < size; i++)
+    //     {
+    //         current_freq_ += glide_step;
+    //         if (fabsf(freq_ - current_freq_) > fabsf(glide_step))
+    //         {
+    //             current_freq_ += glide_step;
+    //         }
+    //         else
+    //         {
+    //             current_freq_ = freq_;
+    //         }
+    //     }
+    // }
+    memset(voice1, 0, sizeof(voice1));
+    memset(voice2, 0, sizeof(voice2));
+    memset(voice3, 0, sizeof(voice3));
+
+    ProcessVoiceBlock(size, freq_, voice1);
+    ProcessVoiceBlock(size, freq_ + SEMITONE_0_2, voice1);
+    ProcessVoiceBlock(size, freq_ - SEMITONE_0_3, voice2);
 
     for (size_t i = 0; i < size; i++)
     {
-        out[0][i] = voice1[i] * 0.1f;
-        out[1][i] = voice2[i] * 0.1f;
+        out[0][i] = (voice1[i] + voice2[i] + voice3[i]); // Left channel
+        out[1][i] = (voice1[i] - voice2[i] - voice3[i]);
     }
 
     // float mix3 = ProcessVoice(current_freq_ + SEMITONE_0_3);
@@ -62,26 +71,45 @@ void HarmonicOsc::ProcessBlock(size_t size, daisy::AudioHandle::OutputBuffer &ou
 
 void HarmonicOsc::ProcessVoiceBlock(size_t size, float freq, float *output)
 {
-    float note[size];
-    float note2[size];
-    float note3[size];
-    float note4[size];
-
+    // float note[size];
+    // float note2[size];
+    // float note3[size];
+    // float note4[size];
     osc1_.SetFreq(freq);
-    osc2_.SetFreq(freq * SEMITONE_3_0);
-    osc3_.SetFreq(freq * SEMITONE_7_0);
-    osc4_.SetFreq(freq * SEMITONE_10_0);
+    osc2_.SetFreq(freq + SEMITONE_3_0);
+    osc3_.SetFreq(freq + SEMITONE_7_0);
+    osc4_.SetFreq(freq + SEMITONE_10_0);
 
-    ProcessOscBlock(size, osc1_, note);
-    ProcessOscBlock(size, osc2_, note2);
-    ProcessOscBlock(size, osc3_, note3);
-    ProcessOscBlock(size, osc4_, note4);
+    // ProcessOscBlock(size, osc1_, note);
+    // ProcessOscBlock(size, osc2_, note2);
+    // ProcessOscBlock(size, osc3_, note3);
+    // ProcessOscBlock(size, osc4_, note4);
 
     for (size_t i = 0; i < size; i++)
     {
+        float m1 = osc1_.Process();
+        float m2 = osc2_.Process();
+        float m3 = osc3_.Process();
+        float m4 = osc4_.Process();
 
-        output[i] = (note[i] + note2[i] + note3[i] + note4[i]) * 0.25f * note4[i];
+        output[i] = (m1 + m2 + m3 + m4) * 0.25f ;
     }
+
+    osc1_.Reset();
+    osc2_.Reset();
+    osc3_.Reset();
+    osc4_.Reset();
+}
+
+void HarmonicOsc::SetFrequency(float freq)
+{
+    freq_ = freq;
+
+    // Update oscillator frequencies immediately
+    osc1_.SetFreq(freq_);
+    osc2_.SetFreq(freq_ + SEMITONE_3_0);
+    osc3_.SetFreq(freq_ + SEMITONE_7_0);
+    osc4_.SetFreq(freq_ + SEMITONE_10_0);
 }
 
 void HarmonicOsc::ProcessOscBlock(size_t size, daisysp::Oscillator &osc, float *out)

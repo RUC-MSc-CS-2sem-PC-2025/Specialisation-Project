@@ -36,7 +36,7 @@ namespace sensorsynth
 
         void ProcessOscBlock(size_t size, daisysp::Oscillator &osc, float *out);
 
-        inline void SetFrequency(float freq) { freq_ = freq; };
+        void SetFrequency(float freq);
 
         inline float GetFrequency() { return freq_; };
 
@@ -57,14 +57,14 @@ namespace sensorsynth
             osc3_.SetFreq(freq_ * 1.5f);
             osc4_.SetFreq(freq_ * pow(2.0f, 10.0f / 12.0f));
 
-            osc1_.SetAmp(0.25f);
-            osc2_.SetAmp(0.25f);
-            osc3_.SetAmp(0.25f);
-            osc4_.SetAmp(0.25f);
+            osc1_.SetAmp(1.0f);
+            osc2_.SetAmp(1.0f);
+            osc3_.SetAmp(1.0f);
+            osc4_.SetAmp(1.0f);
 
-            osc4_.PhaseAdd(0.25f);
+            //osc4_.PhaseAdd(0.25f);
 
-            osc1_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+            osc1_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
             osc2_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
             osc3_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
             osc4_.SetWaveform(daisysp::Oscillator::WAVE_SIN);

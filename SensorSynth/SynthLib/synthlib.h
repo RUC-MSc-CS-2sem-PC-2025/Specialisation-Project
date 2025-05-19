@@ -14,9 +14,9 @@
 // SYNTHESIS
 #include "./Synthesis/harmonicosc.h"
 #include "./Synthesis/shdrone.h"
+#include "./Synthesis/subtractive.h"
 
 // INSTRUMENTS
-#include "./Instruments/harmonydrone.h"
 #include "./Instruments/synth.h"
 
 #endif

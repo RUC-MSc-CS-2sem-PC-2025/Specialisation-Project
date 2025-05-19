@@ -30,14 +30,15 @@ namespace sensorsynth
             }
         }
 
-        void AddGain(float &in)
+        float AddGain(float in)
         {
-            static float previous_gain = gain_;
-            float current_gain = gain_;
-            float interpolated_gain = previous_gain * 0.9f + current_gain * 0.1f;
-            in = in * interpolated_gain;
-            previous_gain = interpolated_gain;
-        };
+            // static float previous_gain = gain_;
+            // float current_gain = gain_;
+            // float interpolated_gain = previous_gain * 0.9f + current_gain * 0.1f;
+            // previous_gain = interpolated_gain;
+        
+            return in * gain_; // Avoid modifying the input directly
+        }
 
     private:
         float gain_;

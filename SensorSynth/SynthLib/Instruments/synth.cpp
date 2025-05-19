@@ -12,7 +12,6 @@ void Synth::Init(float sample_rate)
     chorus_.Init(sample_rate);
     od_.Init();
 
-
     lf_.Init(sample_rate);
     lf_.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12);
     lf_.SetRes(0.4f);
@@ -35,8 +34,7 @@ void Synth::Init(float sample_rate)
 void Synth::Process(size_t size, daisy::AudioHandle::OutputBuffer &out)
 {
 
-    hosc1.ProcessBlock(size, out);
-    
+    hosc1.ProcessBlock(256, out);
 
     // float mix = od_.Process(out_left * 0.5 + out_right * 0.5) * 0.5f;
 
@@ -46,10 +44,14 @@ void Synth::Process(size_t size, daisy::AudioHandle::OutputBuffer &out)
     // out_left = lf_.Process(mix);
     // out_right = lf_.Process(mix);
 
-    // // Add gain and clamp output
-    // out_gain.AddGain(out_left);
-    // out_gain.AddGain(out_right);
+    // Add gain and clamp output
 
+    // for (size_t i = 0; i < size; i++)
+    // {
+    //     out[0][i] = out_gain.AddGain(out[0][i]);
+    //     out[1][i] = out_gain.AddGain(out[1][i]);
+    // }
+    
     // out_left = fminf(fmaxf(out_left, -1.0f), 1.0f);
     // out_right = fminf(fmaxf(out_right, -1.0f), 1.0f);
 };
