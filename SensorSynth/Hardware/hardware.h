@@ -37,25 +37,6 @@ namespace sensorsynth
 
         void StartAudio(daisy::AudioHandle::AudioCallback cb) { hw_.StartAudio(cb); };
 
-        // // void ReadSensors()
-        // // {
-        // //     for (int i = 0; i < sensor_count_; i++)
-        // //     {
-        // //         float value = ReadSensorValue(i);
-        // //         sensors[i]->SetValue(value);
-        // //     }
-        // // };
-
-        // inline u_int8_t GetNumberOfSensors() { return sensor_count_; };
-
-        // inline float GetSensorValue(u_int8_t channel_num) { return sensors[channel_num]->GetValue(); }
-
-        // inline float GetSampleRate() { return hw_.AudioSampleRate(); };
-
-        // inline float GetBufferSize() { return hw_.AudioBlockSize(); };
-
-        // inline daisy::DaisySeed &GetDaisySeed() { return hw_; };
-
     private:
         void ConfigureADC()
         {
@@ -69,23 +50,6 @@ namespace sensorsynth
             hw_.adc.Init(adc_cfg, sensor_count_);
             hw_.adc.Start();
         }
-
-        // void InitSensors()
-        // {
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-        //     sensors.push_back(std::make_unique<Potentiometer>());
-
-        //     for (auto &sensor : sensors)
-        //     {
-        //         sensor->SetMaxValue(0.9690f);
-        //     }
-        // }
-
         void ConfigurePins()
         {
             adc_pins.push_back(daisy::seed::A0);
@@ -96,8 +60,6 @@ namespace sensorsynth
             adc_pins.push_back(daisy::seed::A5);
             adc_pins.push_back(daisy::seed::A6);
         }
-
-        // std::vector<std::unique_ptr<Sensor>> sensors;
         std::vector<daisy::Pin> adc_pins;
 
         u_int8_t sensor_count_;

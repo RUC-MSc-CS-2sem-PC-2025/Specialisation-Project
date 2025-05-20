@@ -17,7 +17,7 @@ namespace sensorsynth
 
         void Init(float sampleRate)
         {
-            this->sampleRate = sampleRate; // Correctly assign the parameter to the member variable
+            this->sampleRate = sampleRate;
             frequency = 440.0f;
             amplitude = 1.0f;
             filterCutoff = 1000.0f;
@@ -34,13 +34,10 @@ namespace sensorsynth
             std::array<float, BLOCK_SIZE> block{};
             for (size_t i = 0; i < BLOCK_SIZE; ++i)
             {
-                // Generate a simple sawtooth wave
                 float sample = amplitude * (2.0f * (phase / (2.0f * M_PI)) - 1.0f);
                 phase += 2.0f * M_PI * frequency / sampleRate;
                 if (phase >= 2.0f * M_PI)
                     phase -= 2.0f * M_PI;
-
-                // Apply a simple low-pass filter
                 sample = lowPassFilter(sample);
 
                 block[i] = sample;

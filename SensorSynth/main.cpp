@@ -11,9 +11,7 @@ using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
 static sensorsynth::SubtractiveSynth subtractive;
-static AdditiveSynth addsynth;
-static FMSynthesizer fm;
-static WavetableSynth wavetable;
+static AnalogControl pot1, pot2, pot3, photo1, photo2;
 CpuLoadMeter cpu;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
@@ -33,18 +31,18 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 int main(void)
 {
     float sample_rate = hw.Init(256);
-    hw.hw_.StartLog();
     cpu.Init(sample_rate, 256);
+
+    // Initialize AnalogControl objects
+    pot1.Init(hw.hw_.adc.GetPtr(0), sample_rate);
+    pot2.Init(hw.hw_.adc.GetPtr(1), sample_rate);
+    pot3.Init(hw.hw_.adc.GetPtr(2), sample_rate);
+    photo1.Init(hw.hw_.adc.GetPtr(3), sample_rate);
+    photo2.Init(hw.hw_.adc.GetPtr(4), sample_rate);
 
     subtractive.Init(sample_rate);
     subtractive.setAmplitude(0.5f);
     subtractive.setFrequency(440.0f);
-
-    addsynth.init(sample_rate, 440.0f);
-
-    fm.init(sample_rate);
-
-    wavetable.init();
 
     hw.StartAudio(AudioCallback);
 
@@ -53,12 +51,19 @@ int main(void)
 
     while (1)
     {
-        if (++print_counter >= print_interval)
-        {
-            float avgcpu = cpu.GetAvgCpuLoad();
+        // Update AnalogControl objects
+        pot1.Process();
+        pot2.Process();
+        pot3.Process();
+        photo1.Process();
+        photo2.Process();
 
-            hw.hw_.PrintLine("Avg: %f", avgcpu);
-            print_counter = 0;
-        }
+        // Use pot1 to control amplitude
+        float amplitude = pot1.Value(); // Read normalized value (0.0 to 1.0)
+        subtractive.setAmplitude(amplitude);
+
+        float filter_cutoff = pot2.Value();
+        filter_cutoff = 15000 / filter_cutoff;
+        subtractive.setFilterCutoff(filter_cutoff);
     }
 }
