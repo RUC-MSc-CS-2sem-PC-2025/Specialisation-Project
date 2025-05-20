@@ -2,9 +2,6 @@
 #include "daisy_seed.h"
 #include "./SynthLib/synthlib.h"
 #include "./Hardware/hardware.h"
-#include "./SynthLib/Synthesis/additive.h"
-#include "./SynthLib/Synthesis/fm.h"
-#include "./SynthLib/Synthesis/wavetable.h"
 
 #include <cmath>
 
@@ -23,36 +20,8 @@ static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
                           size_t size)
 {
-
-    // cpu.OnBlockStart();
-    // std::array<float, 256> block = addsynth.processBlock();
-    // for (size_t i = 0; i < size; ++i)
-    // {
-    //     out[0][i] = block[i];
-    //     out[1][i] = block[i];
-    // }
-    // cpu.OnBlockEnd();
-
-    // cpu.OnBlockStart();
-    // std::array<float, 256> block = subtractive.generateBlock();
-    // for (size_t i = 0; i < size; ++i)
-    // {
-    //     out[0][i] = block[i];
-    //     out[1][i] = block[i];
-    // }
-    // cpu.OnBlockEnd();
-
-    // cpu.OnBlockStart();
-    // std::array<float, 256> block = fm.processBlock();
-    // for (size_t i = 0; i < size; ++i)
-    // {
-    //     out[0][i] = block[i];
-    //     out[1][i] = block[i];
-    // }
-    // cpu.OnBlockEnd();
-
     cpu.OnBlockStart();
-    std::array<float, 256> block = wavetable.processBlock();
+    std::array<float, 256> block = subtractive.generateBlock();
     for (size_t i = 0; i < size; ++i)
     {
         out[0][i] = block[i];
