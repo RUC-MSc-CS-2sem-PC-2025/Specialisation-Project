@@ -24,7 +24,7 @@ namespace sensorsynth
             phase = 0.0f;
             prevSample = 0.0f;
         }
-        
+
         void setFrequency(float freq) { frequency = freq; }
         void setAmplitude(float amp) { amplitude = amp; }
         void setFilterCutoff(float cutoff) { filterCutoff = cutoff; }
@@ -53,11 +53,31 @@ namespace sensorsynth
         float phase;
         float prevSample;
 
-        float lowPassFilter(float input)
-        {
-            float alpha = filterCutoff / (filterCutoff + sampleRate);
-            float output = alpha * input + (1.0f - alpha) * prevSample;
-            prevSample = output;
+        float lowPassFilter(float input) {
+            static float prevOutput1 = 0.0f;
+            static float prevOutput2 = 0.0f;
+            static float prevInput1 = 0.0f;
+            static float prevInput2 = 0.0f;
+
+            float RC = 1.0f / (2.0f * M_PI * filterCutoff);
+            float dt = 1.0f / sampleRate;
+            float alpha = dt / (RC + dt);
+
+            // Resonance control
+            float resonance = 0.6f; // Adjust this value (0.0f to 1.0f) to control resonance
+            float feedback = resonance * (1.0f - alpha);
+
+            // Second-order filter implementation
+            float output = alpha * input 
+                 + feedback * prevOutput1 
+                 - (1.0f - alpha) * prevOutput2;
+
+            prevOutput2 = prevOutput1;
+            prevOutput1 = output;
+
+            prevInput2 = prevInput1;
+            prevInput1 = input;
+
             return output;
         }
     };
