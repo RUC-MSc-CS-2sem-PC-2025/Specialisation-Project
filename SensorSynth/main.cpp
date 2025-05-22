@@ -2,7 +2,7 @@
 #include "daisy_seed.h"
 #include "./SynthLib/synthlib.h"
 #include "./Hardware/hardware.h"
-#include "./Hardware/logger.h"
+
 #include <cmath>
 
 using namespace daisysp;
@@ -10,81 +10,136 @@ using namespace daisy;
 using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
-static sensorsynth::Synth synth;
-CpuLoadMeter cpu;
+static sensorsynth::SubtractiveSynth subtractive;
+static daisysp::LadderFilter filter, filterLP;
+static daisysp::DelayLine<float, 48000> delayS, delayL;
+static daisysp::Oscillator lfo;
+static AnalogControl pot1, pot2, pot3, pot4, pot5, photo1;
+const size_t bufferSize = 256;
+
+float resonance = 0;
+float pitch = 440;
+float lfo_freq = 100.0f;
+float freqLP = 1000.0f;
+float amplitude = 0.5f;
+float filter_cutoff = 500.0f;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
                           size_t size)
 {
-    cpu.OnBlockStart();
+    subtractive.SetAmplitude(amplitude);
 
-    synth.Process(size, out);
+    filter.SetFreq(filter_cutoff);
+    filter.SetRes(resonance);
 
-    cpu.OnBlockEnd();
+    filterLP.SetFreq(freqLP);
+
+    subtractive.SetFrequency(pitch);
+
+    lfo.SetFreq(lfo_freq);
+
+    std::array<float, bufferSize> block{};
+    subtractive.ProcessBlock(block.data(), size);
+    for (size_t i = 0; i < size; i++)
+    {
+        block[i] *= lfo.Process() * 0.75;
+    }
+    
+    filter.ProcessBlock(block.data(), size);
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        float delayed = delayS.Read();
+        float input_with_feedback = block[i] + delayed * 0.7;
+        delayS.Write(input_with_feedback);
+        float wet = 0.5f * delayed;
+
+        float delayed2 = delayL.Read();
+        float input_with_feedback2 = block[i] + delayed2 * 0.7;
+        delayS.Write(input_with_feedback2);
+        float wet2 = 0.5f * delayed2;
+        float dry = 0.5f * block[i];
+
+        float drymix = (dry + wet + wet2);
+
+        float out_sample = daisysp::SoftClip(drymix);
+
+        block[i] = out_sample;
+    }
+
+    filterLP.ProcessBlock(block.data(), size);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        out[0][i] = block[i];
+        out[1][i] = block[i];
+    }
 }
 
 int main(void)
 {
     float sample_rate = hw.Init(256);
-    synth.Init(sample_rate);
 
-    daisy::DaisySeed hw_ = hw.GetDaisySeed();
-    hw_.StartLog();
+    pot1.Init(hw.hw_.adc.GetPtr(0), sample_rate);
+    pot2.Init(hw.hw_.adc.GetPtr(1), sample_rate);
+    pot3.Init(hw.hw_.adc.GetPtr(2), sample_rate);
+    pot4.Init(hw.hw_.adc.GetPtr(3), sample_rate);
+    pot5.Init(hw.hw_.adc.GetPtr(4), sample_rate);
+    photo1.Init(hw.hw_.adc.GetPtr(5), sample_rate);
 
-    cpu.Init(sample_rate, 256);
+    lfo.Init(sample_rate);
+    lfo.SetAmp(0.3f);
+    lfo.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+
+    subtractive.Init(sample_rate);
+    subtractive.SetAmplitude(0.5f);
+    subtractive.SetFrequency(440.0f);
+
+    filter.Init(sample_rate);
+    filter.SetFilterMode(daisysp::LadderFilter::FilterMode::BP24);
+
+    filterLP.Init(sample_rate);
+    filter.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
+    filter.SetRes(0);
+
+    delayS.Init();
+    delayS.SetDelay(14400.f);
+
+    delayL.Init();
+    delayL.SetDelay(72000.f);
+
 
     hw.StartAudio(AudioCallback);
-    size_t num_sensors = hw.GetNumberOfSensors();
-    std::vector<float> previous_values(num_sensors, 0.0f);
-
-    size_t print_counter = 0;
-    const size_t print_interval = 10000;
 
     while (1)
     {
-        hw.ReadSensors();
+        pot1.Process();
+        pot2.Process();
+        pot3.Process();
+        pot4.Process();
+        pot5.Process();
+        photo1.Process();
 
-        if (++print_counter >= print_interval)
-        {
-            float avgcpu = cpu.GetAvgCpuLoad();
+        amplitude = pot1.Value();
 
-            hw_.PrintLine("Avg: %f", avgcpu);
-            print_counter = 0;
-        }
+        filter_cutoff = pot2.Value();
+        filter_cutoff = 20.0f + filter_cutoff * (15000.0f - 20.0f);
 
-        // for (size_t i = 0; i < num_sensors; ++i)
-        // {
-        //     float current_value = hw.GetSensorValue(i);
-        //     if (current_value != previous_values[i])
-        //     {
-        //         previous_values[i] = current_value;
+        resonance = pot3.Value();
+        if (resonance < 0.0f)
+            resonance = 0.0f;
+        else if (resonance > 1.0f)
+            resonance = 1.0f;
+        resonance *= 0.8f;
 
-        //         switch (i)
-        //         {
-        //         case 0:
-        //             synth.MacroOne(current_value);
-        //             break;
-        //         case 1:
-        //             synth.MacroTwo(current_value);
-        //             break;
-        //         case 2:
-        //             synth.MacroThree(current_value);
-        //             break;
-        //         case 3:
-        //             synth.MacroFour(current_value);
-        //             break;
-        //         case 4:
-        //             synth.MacroFive(current_value);
-        //             break;
-        //         case 5:
-        //             synth.MacroSix(current_value);
-        //             break;
-        //         case 6:
-        //             synth.MacroSeven(current_value);
-        //             break;
-        //         }
-        //     }
-        // }
+        lfo_freq = pot4.Value();
+        lfo_freq = 33.0f + lfo_freq * (1000.0f - 33.0f);
+
+        freqLP = pot5.Value();
+        freqLP = 20.0f + freqLP * (15000.0f - 20.0f);
+
+        pitch = photo1.Value();
+        pitch = 20.0f + pitch * (500.0f - 20.0f);
     }
 }
