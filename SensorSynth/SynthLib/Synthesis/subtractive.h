@@ -26,17 +26,14 @@ namespace sensorsynth
         void SetFrequency(float freq) { frequency_ = freq; }
         void SetAmplitude(float amp) { amplitude_ = amp; }
 
-        void ProcessBlock(float* buf, size_t size)
+        void ProcessBlock(float *buf, size_t size)
         {
             for (size_t i = 0; i < size; ++i)
             {
                 float sample = amplitude_ * (2.0f * (phase_ / (2.0f * M_PI)) - 1.0f);
                 phase_ += 2.0f * M_PI * frequency_ / sampleRate_;
-                if (phase_ >= 2.0f * M_PI)
-                    phase_ -= 2.0f * M_PI;
-
+                phase_ = fmodf(phase_, 2.0f * M_PI); // Use fmod for stable wrapping
                 buf[i] = sample;
-                
             }
         }
 
