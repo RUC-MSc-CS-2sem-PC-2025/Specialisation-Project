@@ -1,6 +1,5 @@
 #include "daisysp.h"
 #include "daisy_seed.h"
-#include "sensor.h"
 #include <memory>
 
 #pragma once
