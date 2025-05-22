@@ -22,7 +22,7 @@ include $(SYSTEM_FILES_DIR)/Makefile
 
 # Float support
 # Uncomment the following line to enable float support in printf
- LDFLAGS += -u _printf_float
+# LDFLAGS += -u _printf_float
 
 
 C_INCLUDES += -I../libraries/libDaisy/Drivers/STM32_USB_Device_Library/Class/CDC/Inc
