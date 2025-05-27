@@ -32,7 +32,7 @@ namespace sensorsynth
             {
                 float sample = amplitude_ * (2.0f * (phase_ / (2.0f * M_PI)) - 1.0f);
                 phase_ += 2.0f * M_PI * frequency_ / sampleRate_;
-                phase_ = fmodf(phase_, 2.0f * M_PI); // Use fmod for stable wrapping
+                phase_ = fmodf(phase_, 2.0f * M_PI);
                 buf[i] = sample;
             }
         }

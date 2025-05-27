@@ -23,7 +23,6 @@ namespace sensorsynth
         float Init(size_t blocksize)
         {
             hw_.Init();
-            // hw_.StartLog();
             hw_.SetAudioBlockSize(blocksize);
 
             ConfigurePins();
@@ -56,8 +55,6 @@ namespace sensorsynth
             adc_pins.push_back(daisy::seed::A2);
             adc_pins.push_back(daisy::seed::A3);
             adc_pins.push_back(daisy::seed::A4);
-            adc_pins.push_back(daisy::seed::A5);
-            adc_pins.push_back(daisy::seed::A6);
         }
         std::vector<daisy::Pin> adc_pins;
 
