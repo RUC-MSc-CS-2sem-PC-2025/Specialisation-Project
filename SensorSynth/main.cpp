@@ -2,6 +2,7 @@
 #include "daisy_seed.h"
 #include "./SynthLib/synthlib.h"
 #include "./Hardware/hardware.h"
+#include "./Hardware/controls.h"
 
 #include <cmath>
 
@@ -10,11 +11,11 @@ using namespace daisy;
 using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
+static Controls controls;
 static sensorsynth::SubtractiveSynth subtractive;
 static daisysp::LadderFilter filter, filterLP;
 static daisysp::DelayLine<float, 48000> delayS, delayL;
 static daisysp::Oscillator lfo;
-static AnalogControl pot1, pot2, pot3, pot4, pot5, photo1;
 
 const size_t bufferSize = 256;
 
@@ -78,11 +79,7 @@ int main(void)
 {
     float sample_rate = hw.Init(256);
 
-    pot1.Init(hw.hw_.adc.GetPtr(0), sample_rate);
-    pot2.Init(hw.hw_.adc.GetPtr(1), sample_rate);
-    pot3.Init(hw.hw_.adc.GetPtr(2), sample_rate);
-    pot4.Init(hw.hw_.adc.GetPtr(3), sample_rate);
-    photo1.Init(hw.hw_.adc.GetPtr(4), sample_rate);
+    controls.Init(hw.hw_, sample_rate);
 
     lfo.Init(sample_rate);
     lfo.SetAmp(0.3f);
@@ -109,28 +106,24 @@ int main(void)
 
     while (1)
     {
-        pot1.Process();
-        pot2.Process();
-        pot3.Process();
-        pot4.Process();
-        photo1.Process();
+        controls.Process();
 
-        amplitude = pot1.Value();
+        amplitude = controls.pot1.Value();
 
-        filter_cutoff = pot2.Value();
+        filter_cutoff = controls.pot2.Value();
         filter_cutoff = 20.0f + filter_cutoff * (15000.0f - 20.0f);
 
-        resonance = pot3.Value();
+        resonance = controls.pot3.Value();
         if (resonance < 0.0f)
             resonance = 0.0f;
         else if (resonance > 1.0f)
             resonance = 1.0f;
         resonance *= 0.8f;
 
-        pitch = pot4.Value();
+        pitch = controls.pot4.Value();
         pitch = 33.0f + pitch * (1000.0f - 33.0f);
 
-        lfo_freq = photo1.Value();
+        lfo_freq = controls.photo1.Value();
         lfo_freq = 20.0f + lfo_freq * (500.0f - 20.0f);
     }
 }
