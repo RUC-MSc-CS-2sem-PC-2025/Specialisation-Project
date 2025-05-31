@@ -11,13 +11,13 @@ using namespace daisy;
 using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
-static Controls controls;
+static sensorsynth::Controls controls;
 static sensorsynth::SubtractiveSynth subtractive;
 static daisysp::LadderFilter filter, filterLP;
 static daisysp::DelayLine<float, 48000> delayS, delayL;
 static daisysp::Oscillator lfo;
 
-const size_t bufferSize = 256;
+const size_t bufferSize = 32;
 
 float resonance = 0;
 float pitch = 440;
@@ -77,7 +77,7 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 
 int main(void)
 {
-    float sample_rate = hw.Init(256);
+    float sample_rate = hw.Init(bufferSize);
 
     controls.Init(hw.hw_, sample_rate);
 
@@ -123,7 +123,7 @@ int main(void)
         pitch = controls.pot4.Value();
         pitch = 33.0f + pitch * (1000.0f - 33.0f);
 
-        lfo_freq = controls.photo1.Value();
+        lfo_freq = controls.ldr1.Value();
         lfo_freq = 20.0f + lfo_freq * (500.0f - 20.0f);
     }
 }
