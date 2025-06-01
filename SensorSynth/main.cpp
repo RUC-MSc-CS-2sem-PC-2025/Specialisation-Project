@@ -19,11 +19,11 @@ static daisysp::Oscillator lfo;
 
 const size_t bufferSize = 32;
 
-float resonance = 0;
+float amplitude = 0.5f;
 float pitch = 440;
 float lfo_freq = 100.0f;
-float amplitude = 0.5f;
 float filter_cutoff = 500.0f;
+float resonance = 0;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
@@ -31,14 +31,15 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 {
     subtractive.SetAmplitude(amplitude);
     subtractive.SetFrequency(pitch);
+    lfo.SetFreq(lfo_freq);
+
     filter.SetFreq(filter_cutoff);
     filter.SetRes(resonance);
-    lfo.SetFreq(lfo_freq);
 
     std::array<float, bufferSize> block{};
 
     subtractive.ProcessBlock(block.data(), size);
-    
+
     for (size_t i = 0; i < size; i++)
     {
         block[i] *= lfo.Process() * 0.75;
@@ -81,26 +82,26 @@ int main(void)
 
     controls.Init(hw.hw_, sample_rate);
 
-    lfo.Init(sample_rate);
-    lfo.SetAmp(0.3f);
-    lfo.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
-
     subtractive.Init(sample_rate);
     subtractive.SetAmplitude(0.5f);
     subtractive.SetFrequency(440.0f);
 
+    lfo.Init(sample_rate);
+    lfo.SetAmp(0.3f);
+    lfo.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+
     filter.Init(sample_rate);
     filter.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12);
-
-    filterLP.Init(sample_rate);
-    filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
-    filterLP.SetRes(0);
 
     delayS.Init();
     delayS.SetDelay(14400.f);
 
     delayL.Init();
     delayL.SetDelay(72000.f);
+
+    filterLP.Init(sample_rate);
+    filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
+    filterLP.SetRes(0);
 
     hw.StartAudio(AudioCallback);
 
@@ -110,18 +111,18 @@ int main(void)
 
         amplitude = controls.pot1.Value();
 
-        filter_cutoff = controls.pot2.Value();
+        pitch = controls.pot2.Value();
+        pitch = 33.0f + pitch * (1000.0f - 33.0f);
+
+        filter_cutoff = controls.pot3.Value();
         filter_cutoff = 20.0f + filter_cutoff * (15000.0f - 20.0f);
 
-        resonance = controls.pot3.Value();
+        resonance = controls.pot4.Value();
         if (resonance < 0.0f)
             resonance = 0.0f;
         else if (resonance > 1.0f)
             resonance = 1.0f;
         resonance *= 0.8f;
-
-        pitch = controls.pot4.Value();
-        pitch = 33.0f + pitch * (1000.0f - 33.0f);
 
         lfo_freq = controls.ldr1.Value();
         lfo_freq = 20.0f + lfo_freq * (500.0f - 20.0f);
