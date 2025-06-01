@@ -2,6 +2,7 @@
 #include "daisy_seed.h"
 #include "./SynthLib/synthlib.h"
 #include "./Hardware/hardware.h"
+#include "./Hardware/controls.h"
 
 #include <cmath>
 
@@ -10,19 +11,19 @@ using namespace daisy;
 using namespace sensorsynth;
 
 static sensorsynth::Hardware hw;
+static sensorsynth::Controls controls;
 static sensorsynth::SubtractiveSynth subtractive;
 static daisysp::LadderFilter filter, filterLP;
 static daisysp::DelayLine<float, 48000> delayS, delayL;
 static daisysp::Oscillator lfo;
-static AnalogControl pot1, pot2, pot3, pot4, pot5, photo1;
 
-const size_t bufferSize = 256;
+const size_t bufferSize = 32;
 
-float resonance = 0;
+float amplitude = 0.5f;
 float pitch = 440;
 float lfo_freq = 100.0f;
-float amplitude = 0.5f;
 float filter_cutoff = 500.0f;
+float resonance = 0;
 
 static void AudioCallback(AudioHandle::InputBuffer in,
                           AudioHandle::OutputBuffer out,
@@ -30,14 +31,15 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 {
     subtractive.SetAmplitude(amplitude);
     subtractive.SetFrequency(pitch);
+    lfo.SetFreq(lfo_freq);
+
     filter.SetFreq(filter_cutoff);
     filter.SetRes(resonance);
-    lfo.SetFreq(lfo_freq);
 
     std::array<float, bufferSize> block{};
 
     subtractive.ProcessBlock(block.data(), size);
-    
+
     for (size_t i = 0; i < size; i++)
     {
         block[i] *= lfo.Process() * 0.75;
@@ -76,28 +78,20 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 
 int main(void)
 {
-    float sample_rate = hw.Init(256);
+    float sample_rate = hw.Init(bufferSize);
 
-    pot1.Init(hw.hw_.adc.GetPtr(0), sample_rate);
-    pot2.Init(hw.hw_.adc.GetPtr(1), sample_rate);
-    pot3.Init(hw.hw_.adc.GetPtr(2), sample_rate);
-    pot4.Init(hw.hw_.adc.GetPtr(3), sample_rate);
-    photo1.Init(hw.hw_.adc.GetPtr(4), sample_rate);
-
-    lfo.Init(sample_rate);
-    lfo.SetAmp(0.3f);
-    lfo.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+    controls.Init(hw.hw_, sample_rate);
 
     subtractive.Init(sample_rate);
     subtractive.SetAmplitude(0.5f);
     subtractive.SetFrequency(440.0f);
 
+    lfo.Init(sample_rate);
+    lfo.SetAmp(0.3f);
+    lfo.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+
     filter.Init(sample_rate);
     filter.SetFilterMode(daisysp::LadderFilter::FilterMode::BP12);
-
-    filterLP.Init(sample_rate);
-    filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
-    filterLP.SetRes(0);
 
     delayS.Init();
     delayS.SetDelay(14400.f);
@@ -105,32 +99,32 @@ int main(void)
     delayL.Init();
     delayL.SetDelay(72000.f);
 
+    filterLP.Init(sample_rate);
+    filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
+    filterLP.SetRes(0);
+
     hw.StartAudio(AudioCallback);
 
     while (1)
     {
-        pot1.Process();
-        pot2.Process();
-        pot3.Process();
-        pot4.Process();
-        photo1.Process();
+        controls.Process();
 
-        amplitude = pot1.Value();
+        amplitude = controls.pot1.Value();
 
-        filter_cutoff = pot2.Value();
+        pitch = controls.pot2.Value();
+        pitch = 33.0f + pitch * (1000.0f - 33.0f);
+
+        filter_cutoff = controls.pot3.Value();
         filter_cutoff = 20.0f + filter_cutoff * (15000.0f - 20.0f);
 
-        resonance = pot3.Value();
+        resonance = controls.pot4.Value();
         if (resonance < 0.0f)
             resonance = 0.0f;
         else if (resonance > 1.0f)
             resonance = 1.0f;
         resonance *= 0.8f;
 
-        pitch = pot4.Value();
-        pitch = 33.0f + pitch * (1000.0f - 33.0f);
-
-        lfo_freq = photo1.Value();
+        lfo_freq = controls.ldr1.Value();
         lfo_freq = 20.0f + lfo_freq * (500.0f - 20.0f);
     }
 }

@@ -1,8 +1,9 @@
+#pragma once
+
 #include "daisysp.h"
 #include "daisy_seed.h"
 #include <memory>
 
-#pragma once
 #ifndef HRDWR_H
 #define HRDWR_H
 

@@ -42,8 +42,6 @@ namespace sensorsynth
         float frequency_;
         float amplitude_;
         float phase_;
-
-        daisysp::LadderFilter filter;
     };
 }
 
