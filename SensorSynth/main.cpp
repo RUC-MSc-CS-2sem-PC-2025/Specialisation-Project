@@ -56,7 +56,7 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 
         float delayed2 = delayL.Read();
         float input_with_feedback2 = block[i] + delayed2 * 0.7;
-        delayS.Write(input_with_feedback2);
+        delayL.Write(input_with_feedback2);
         float wet2 = 0.5f * delayed2;
         float dry = 0.5f * block[i];
 
@@ -97,7 +97,7 @@ int main(void)
     delayS.SetDelay(14400.f);
 
     delayL.Init();
-    delayL.SetDelay(72000.f);
+    delayL.SetDelay(16800.f);
 
     filterLP.Init(sample_rate);
     filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
