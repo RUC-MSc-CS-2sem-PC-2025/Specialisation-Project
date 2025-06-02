@@ -14,7 +14,7 @@ static sensorsynth::Hardware hw;
 static sensorsynth::Controls controls;
 static sensorsynth::SubtractiveSynth subtractive;
 static daisysp::LadderFilter filter, filterLP;
-static daisysp::DelayLine<float, 48000> delayS, delayL;
+static daisysp::DelayLine<float, 48000> delayS;
 static daisysp::Oscillator lfo;
 
 const size_t bufferSize = 32;
@@ -53,14 +53,9 @@ static void AudioCallback(AudioHandle::InputBuffer in,
         float input_with_feedback = block[i] + delayed * 0.7;
         delayS.Write(input_with_feedback);
         float wet = 0.5f * delayed;
-
-        float delayed2 = delayL.Read();
-        float input_with_feedback2 = block[i] + delayed2 * 0.7;
-        delayL.Write(input_with_feedback2);
-        float wet2 = 0.5f * delayed2;
         float dry = 0.5f * block[i];
 
-        float drymix = (dry + wet + wet2);
+        float drymix = dry + wet;
 
         float out_sample = daisysp::SoftClip(drymix);
 
@@ -95,9 +90,6 @@ int main(void)
 
     delayS.Init();
     delayS.SetDelay(14400.f);
-
-    delayL.Init();
-    delayL.SetDelay(16800.f);
 
     filterLP.Init(sample_rate);
     filterLP.SetFilterMode(daisysp::LadderFilter::FilterMode::LP12);
