@@ -18,6 +18,7 @@ static daisysp::DelayLine<float, 48000> delayS;
 static daisysp::Oscillator lfo;
 
 const size_t bufferSize = 32;
+uint8_t DMA_BUFFER_MEM_SECTION buffer[4];
 
 float amplitude = 0.5f;
 float pitch = 440;
@@ -100,6 +101,8 @@ int main(void)
     while (1)
     {
         controls.Process();
+
+        hw.spi_handle.DmaReceive(buffer, 4, NULL, NULL, NULL);
 
         amplitude = controls.pot1.Value();
 

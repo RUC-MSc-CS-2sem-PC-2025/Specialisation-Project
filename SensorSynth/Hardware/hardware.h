@@ -17,6 +17,7 @@ namespace sensorsynth
     {
     public:
         daisy::DaisySeed hw_;
+        SpiHandle spi_handle;
 
         Hardware() {};
         ~Hardware() {};
@@ -31,12 +32,33 @@ namespace sensorsynth
 
             ConfigureADC();
 
+            ConfigureSPI();
+
             return hw_.AudioSampleRate();
         };
 
         void StartAudio(daisy::AudioHandle::AudioCallback cb) { hw_.StartAudio(cb); };
 
     private:
+        void ConfigureSPI()
+        {
+            // SpiHandle object and Spi Configuration object
+            SpiHandle::Config spi_conf;
+
+            // Set some configurations
+            spi_conf.periph = SpiHandle::Config::Peripheral::SPI_1;
+            spi_conf.mode = SpiHandle::Config::Mode::SLAVE;
+            spi_conf.direction = SpiHandle::Config::Direction::TWO_LINES;
+            spi_conf.nss = SpiHandle::Config::NSS::HARD_OUTPUT;
+            spi_conf.pin_config.sclk = Pin(PORTG, 11);
+            spi_conf.pin_config.miso = Pin(PORTB, 4);
+            spi_conf.pin_config.mosi = Pin(PORTB, 5);
+            spi_conf.pin_config.nss = Pin(PORTG, 10);
+
+            // Initialize the handle using our configuration
+            spi_handle.Init(spi_conf);
+        }
+
         void ConfigureADC()
         {
             AdcChannelConfig adc_cfg[sensor_count_];
