@@ -15,7 +15,7 @@ namespace sensorsynth
     private:
         float sample_rate;
         SubtractiveSynth subtractive;
-        daisysp::LadderFilter filter, filterLP;
+        daisysp::LadderFilter filterHP, filterLP, filterBP;
         daisysp::Oscillator lfo;
         daisysp::DelayLine<float, 48000> delayS;
         daisysp::Chorus chorus;
