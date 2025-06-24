@@ -36,6 +36,7 @@ void SynthLib::Init(float sample_rate)
     delayS.SetDelay(14400.f);
 
     chorus.Init(sample_rate);
+    chorus.SetDelayMs(500);
 }
 
 void SynthLib::ProcessAudio(daisy::AudioHandle::InputBuffer in, daisy::AudioHandle::OutputBuffer out, size_t size)
@@ -72,16 +73,16 @@ void SynthLib::ProcessAudio(daisy::AudioHandle::InputBuffer in, daisy::AudioHand
     }
 }
 
-void SynthLib::SetValues(uint8_t amp, uint8_t freq, uint8_t filter_cutoff, uint8_t amp_enable)
+void SynthLib::SetValues(daisy_data_t *input)
 {
-    float amplitude = 0.1f + ((float)amp / 255.0f) * (0.5f - 0.1f);
-    float pitch = 100.0f + ((float)freq / 255.0f) * (5000.0f - 100.0f);
-    float cutoff = 55.0f + ((float)freq / 255.0f) * (3000.0f - 55.0f);
-    float chorus_delay = (float)filter_cutoff / 255.0f;
-    float lfo_freq = 20.0f + ((float)filter_cutoff / 255.0f) * (500.0f - 20.0f);
+    // float amplitude = 0.1f + ((float)amp / 255.0f) * (0.5f - 0.1f);
+    float pitch = 100.0f + ((float)input->left_hand / 255.0f) * (5000.0f - 100.0f);
+    float cutoff = 300.0f + ((float)input->right_hand / 255.0f) * (10000.0f - 300.0f);
+    // float chorus_delay = (float)filter_cutoff / 255.0f;
+    // float lfo_freq = 20.0f + ((float)filter_cutoff / 255.0f) * (500.0f - 20.0f);
 
-    //subtractive.SetFrequency(pitch);
-    subtractive.SetAmplitude((float)amp_enable * 0.5f);
+    subtractive.SetFrequency(pitch);
+    subtractive.SetAmplitude((float)input->sound_on * 0.5f);
     filterBP.SetFreq(cutoff);
-    chorus.SetDelay(chorus_delay);
+    // chorus.SetDelay(chorus_delay);
 }

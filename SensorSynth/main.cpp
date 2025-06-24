@@ -18,7 +18,7 @@ static void audio_callback(daisy::AudioHandle::InputBuffer in, daisy::AudioHandl
 
 static void spi_receive_callback(void *context, daisy::SpiHandle::Result result)
 {
-    synth.SetValues(buffer[0], buffer[1], buffer[2], buffer[3]);
+    synth.SetValues((daisy_data_t*)&buffer);
 
     hw.spi_handle.DmaReceive(buffer, 4, NULL, spi_receive_callback, NULL);
 }

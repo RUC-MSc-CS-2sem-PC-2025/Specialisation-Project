@@ -4,6 +4,15 @@
 #include "daisy_seed.h"
 #include "daisysp.h"
 
+struct daisy_data {
+	uint8_t sound_on;
+	uint8_t left_hand;
+	uint8_t right_hand;
+	uint8_t placeholder;
+};
+
+typedef struct daisy_data daisy_data_t;
+
 namespace sensorsynth
 {
     class SynthLib
@@ -11,7 +20,7 @@ namespace sensorsynth
     public:
         void Init(float sample_rate);
         void ProcessAudio(daisy::AudioHandle::InputBuffer in, daisy::AudioHandle::OutputBuffer out, size_t size);
-        void SetValues(uint8_t amp, uint8_t freq, uint8_t filter_cutoff, uint8_t amp_enable);
+        void SetValues(daisy_data_t *input);
     private:
         float sample_rate;
         SubtractiveSynth subtractive;
